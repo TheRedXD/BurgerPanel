@@ -88,50 +88,58 @@ let serverCreating = ref(false);
 let newMCServerPort = ref(25565);
 </script>
 <template>
-    <h1>Servers</h1>
+    <div class="servers">
+        <h1>Servers</h1>
         <div class="buttons">
         <RouterLink :to="{query: {all: 'true'}}"><button v-if="router.currentRoute.value.query.all != 'true' && user.hasPermission('servers.all.view')">Show all servers</button></RouterLink>
         <RouterLink v-if="router.currentRoute.value.query.all == 'true'" :to="{query: {}}"><button>Show only my servers</button></RouterLink>
         <button @click="serverCreatorOpen = !serverCreatorOpen" v-if="user.hasPermission('servers.create')">Create server {{ serverCreatorOpen ? "∧" : "V" }}</button>
         <RouterLink :to="{name: 'importServer'}"><button v-if="user.hasPermission('servers.import')">Import server</button></RouterLink></div>
-    <div id="create-server" v-if="serverCreatorOpen && user.hasPermission('servers.create')">
-        <h2>Create server</h2>
-        <form>
-            Name: <input type="text" v-model="newServerName" /> <br/>
-            Memory (MB): <input type="number" v-model="newServerMem" /> <br/>
-            Version: <input type="text" v-model="newMCServerVersion" /> <br/>
-            Software: <select v-model="newMCServerSoftware"><option v-for="software in allowedSoftwares">{{ software }}</option></select> <br/>
-            Port: <input type="number" v-model="newMCServerPort" /> <br/>
-            I agree to the <a target="_blank" href="https://www.minecraft.net/en-us/eula">Minecraft End User License Agreement</a> <input type="checkbox" v-model="agreesToEULA"> <br/>
-            <button type="submit" @click.prevent="createServer" :disabled="serverCreating">Create</button>
-        </form>
+        <div id="create-server" v-if="serverCreatorOpen && user.hasPermission('servers.create')">
+            <h2>Create server</h2>
+            <form>
+                Name: <input type="text" v-model="newServerName" /> <br/>
+                Memory (MB): <input type="number" v-model="newServerMem" /> <br/>
+                Version: <input type="text" v-model="newMCServerVersion" /> <br/>
+                Software: <select v-model="newMCServerSoftware"><option v-for="software in allowedSoftwares">{{ software }}</option></select> <br/>
+                Port: <input type="number" v-model="newMCServerPort" /> <br/>
+                I agree to the <a target="_blank" href="https://www.minecraft.net/en-us/eula">Minecraft End User License Agreement</a> <input type="checkbox" v-model="agreesToEULA"> <br/>
+                <button type="submit" @click.prevent="createServer" :disabled="serverCreating">Create</button>
+            </form>
+        </div>
+        <div id="servers-container">
+            <ServerVue v-for="server of usedServers" :server="server" />
+        </div>
+        <p v-if="usedServers.length === 0">
+        <template v-if="!loading">There are no servers for you to manage.{{ (!(router.currentRoute.value.query.all == 'true') && user.hasPermission('servers.all.view')) ? " You can click 'Show all servers' to see all servers on the server." : '' }}</template>
+        <template v-else>Loading servers...</template>
+        </p>
     </div>
-    <div id="servers-container">
-        <ServerVue v-for="server of usedServers" :server="server" />
-    </div>
-    <p v-if="usedServers.length === 0">
-    <template v-if="!loading">There are no servers for you to manage.{{ (!(router.currentRoute.value.query.all == 'true') && user.hasPermission('servers.all.view')) ? " You can click 'Show all servers' to see all servers on the server." : '' }}</template>
-    <template v-else>Loading servers...</template>
-    </p>
 </template>
 
 <style scoped>
-    h1 {
-        margin: 10px 15px;
-    }
+.servers {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 51px - 40px);
+    padding: 20px;
+}
 
-    button {
-        margin-left: 5px;
-    }
+h1 {
+    margin: 10px 15px;
+}
 
-    .buttons {
-        margin-left: 10px;
-    }
+button {
+    margin-left: 5px;
+}
 
-    #servers-container {
-        display: flex;
-        flex-wrap:wrap;
-        justify-content: center;
-        margin-top: 10px;
-    }
+.buttons {
+    margin-left: 10px;
+}
+
+#servers-container {
+    display: flex;
+    flex-wrap:wrap;
+    justify-content: center;
+    margin-top: 10px;
+}
 </style>

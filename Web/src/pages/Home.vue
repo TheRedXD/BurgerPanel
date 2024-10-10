@@ -21,6 +21,7 @@ let pinnedServers = await servers.getPinnedServers();
     .home-container {
         margin: 10px;
         display: block;
+        overflow-y: auto;
     }
     * {
         padding: 10px;

@@ -75,19 +75,30 @@
         <br/>
         <h3>Log Events</h3>
         <p><b>Note:</b> This will only apply for webhooks. For security reasons everything will be logged to the terminal and log file.</p>
-        <div v-for="id in IDs" class="logevents-id">
-            {{ id }} - <span :class="{
-                red: isDisabled(id),
-                green: !isDisabled(id)
-            }">{{ isDisabled(id) ? "Disabled" : "Enabled" }}</span> <button @click="toggle(id)">Toggle</button>
+        <div class="log-events">
+            <div v-for="id in IDs" class="logevents-id">
+                {{ id }} - <span :class="{
+                    red: isDisabled(id),
+                    green: !isDisabled(id)
+                }">{{ isDisabled(id) ? "Disabled" : "Enabled" }}</span> <button @click="toggle(id)">Toggle</button>
+            </div>
         </div>
     </div>
-    <div v-else>
+    <div v-else class="container">
         Loading
     </div>
 </template>
 <style scoped>
-.container 
+.container {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 51px - 40px);
+    padding: 20px;
+    overflow-y: auto;
+}
+.log-events {
+    overflow-y: auto;
+    height: calc(100% - 250px);
+}
 .red {
     color: red;
 }

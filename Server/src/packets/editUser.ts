@@ -7,6 +7,7 @@ import logger, { LogLevel } from "../logger.js";
 import makeHash from "../util/makeHash.js";
 import { Request } from "../../../Share/Requests.js";
 import { userHasAccessToServer } from "../serverManager.js";
+import * as config from "../config.js";
 
 export default class EditUser extends Packet {
     name: Request = "editUser";
@@ -69,20 +70,20 @@ export default class EditUser extends Packet {
             case "changeUsername":
                 if (!hasPermission(client.data.auth.user, "users.username.change.all") && !(client.data.auth.user?._id == user._id.toString() && !hasPermission(client.data.auth.user, "users.username.change.self")))
                     return `You do not have permission to edit the username of ${client.data.auth.user?._id == user._id.toString() ? "yourself" : "this person"}!`;
-                    
+
                     if (typeof data.username != "string") return "Not a string!";
 
                     if(data.username.length == 0) return "Cant be empty!";
-                    
+
                     logger.log(`${client.data.auth.user?.username} is changing the username of ${user.username} to ${data.username}!`, "user.username.changed", LogLevel.INFO);
-                    
+
                     user.username = data.username;
-                    
+
                     this.sendUserUpdated(user.toJSON());
                 break;
             case "finishSetup":
                 if (user._id.toString() != client.data.auth.user?._id) return; //impossible
-                    
+
                 if (typeof client.data.auth.user?.password != "string") {
                     return "Set a password first!"
                 }
@@ -90,12 +91,12 @@ export default class EditUser extends Packet {
                 logger.log(`${client.data.auth.user?.username} finished setup!`, "user.username.changed", LogLevel.INFO);
                 this.sendUserUpdated(user.toJSON());
                 break;
-            
+
             case "resetToken":
                 if (client.data.auth.user?._id != user._id.toString() && !hasPermission(client.data.auth.user, "users.token.reset")) return;
                 logger.log(`${client.data.auth.user?.username} is resetting the token of ${user.username}`, "user.token.reset")
                 user.token = makeToken();
-                
+
                 clients.filter(c => c.data.auth.user?._id == user._id.toString()).forEach(cl => {
                     if(cl != client) cl.close();
                 });

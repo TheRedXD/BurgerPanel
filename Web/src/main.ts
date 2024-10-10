@@ -160,6 +160,16 @@ const router = createRouter({
             }
         },
         {
+            name: "editor",
+            path: "/editor",
+            props: true,
+            component: () => import("./pages/Editor.vue"),
+            meta: {
+                setTitle: false,
+                title: "Editor"
+            }
+        },
+        {
             name: "404",
             path: '/:pathMatch(.*)*',
             component: () => import("./pages/404.vue"),

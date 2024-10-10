@@ -1,6 +1,6 @@
 {
   "name": "burgerpanel-server",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,8 @@
     "express": "^4.19.2",
     "mime-types": "^2.1.35",
     "mongoose": "^8.4.1",
-    "ws": "^8.17.0"
+    "ws": "^8.17.0",
+    "yaml": "^2.5.1"
   },
   "packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394"
 }

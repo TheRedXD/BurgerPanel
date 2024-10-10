@@ -18,6 +18,10 @@ import {buildInfo} from "../../Share/BuildInfo.js";
 import pluginHandler, {mixinHandler} from "./plugin.js";
 import { exists } from "./util/exists.js";
 import { OurClient, OurWebsocketClient, clients } from "./clients.js";
+import experiments from "./util/experiments.js";
+
+// Automatically create if necessary
+experiments.getExperimentValues();
 
 export const isProd = process.env.NODE_ENV == "production";
 
@@ -489,6 +493,7 @@ packetHandler.init().then(async () => {
                 console.log("servers: List all servers")
                 console.log("exit: Stop all servers and exit");
                 console.log("set-opt <option> <value>: Sets a setting");
+                console.log("port <value>: Sets the webServerPort config option, same as doing set-opt webServerPort <value>");
                 console.log("start <server>: Start a server");
                 console.log("stop <server>: Stop a server");
                 console.log("lockdown-auto: Enable lockdown mode and create a excluded user (recommended)");
@@ -501,6 +506,14 @@ packetHandler.init().then(async () => {
             let args = dataStr.split(" ");
             args.shift();
             let option = args.shift();
+            let value = args.join(" ");
+            if(!isValidKey(option)) return logger.log(`Attempted to change config key ${option} to ${value} but it does not exist!`, "error", LogLevel.ERROR);
+            await logger.log(`${option} is being changed to ${value} in the console`, "settings.change", LogLevel.INFO);
+            await setSetting(option, value);
+        } else if(dataStr.startsWith("port ")) {
+            let args = dataStr.split(" ");
+            args.shift();
+            let option = "webServerPort";
             let value = args.join(" ");
             if(!isValidKey(option)) return logger.log(`Attempted to change config key ${option} to ${value} but it does not exist!`, "error", LogLevel.ERROR);
             await logger.log(`${option} is being changed to ${value} in the console`, "settings.change", LogLevel.INFO);

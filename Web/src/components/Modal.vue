@@ -134,11 +134,11 @@ function onBlurClick(e: MouseEvent) {
         zIndex: __isDefaultModal ? 1050 : 1040
     }">
         <div id="modal-container" :style="{maxWidth: ((props.customMaxWidth ?? 1000) + 'px')}" ref="containerRef">
+            <div id="close-btn" @click="closeModal">
+                ×
+            </div>
             <div id="modal">
                 <div id="modal-content">
-                    <div id="close-btn" @click="closeModal">
-                        X
-                    </div>
                     <div id="slot" :class="{
                         'no-scrollbar': hideScrollbar
                     }">
@@ -259,7 +259,7 @@ function onBlurClick(e: MouseEvent) {
     left: 0;
     right: 0;
     justify-content: center;
-    background-color: #262626;
+    background-color: #1a1a1a;
     border: 1px solid #353535;
     margin: auto;
     z-index: 9999;
@@ -277,13 +277,27 @@ function onBlurClick(e: MouseEvent) {
 }
 
 #close-btn {
+    display: flex;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
     position: absolute;
     top: 0;
     right: 0;
     margin-top: 8px;
     margin-right: 8px;
+    padding: 5px;
+    border-radius: 5px;
     cursor: pointer;
     user-select: none;
+    font-size: 32px;
+    transition: all .05s ease-in-out;
+    line-height: 8px;
+    padding-bottom: 10px;
+    &:hover {
+        background-color: #282828;
+    }
 }
 
 #slot {

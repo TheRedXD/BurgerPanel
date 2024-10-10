@@ -209,26 +209,18 @@ async function changeUseJVMArgs() {
     <button @click="servers.togglePin(server)">{{ servers.isPinned(server) ? "Unpin" : "Pin" }}</button>
     <br/><hr/>
     <div class="main-server-settings">
-    Server name: <TextInput :default="server.name" @set="renameServer" :force-disabled="!user.hasServerPermission(server, 'set.name')" />
-    <br />
-    Server path: {{ server.path }} (Read only)
-    <br />
-    Memory (MB): <TextInput :default="server.mem.toString()" @set="changeMemory" :force-disabled="!user.hasServerPermission(server, 'set.mem')" />
-    <br />
+    <p>Server name: <TextInput :default="server.name" @set="renameServer" :force-disabled="!user.hasServerPermission(server, 'set.name')" /></p>
+    <p>Server path: {{ server.path }} (Read only)</p>
+    <p>Memory (MB): <TextInput :default="server.mem.toString()" @set="changeMemory" :force-disabled="!user.hasServerPermission(server, 'set.mem')" /></p>
     <div class="mempadder"></div>
-    JVM Arguments: <TextField :default="server.jvmArgs" @set="changeJVMArgs" :force-disabled="!user.hasServerPermission(server, 'set.jvmArgs')" />
-    Version: <TextInput :default="server.version" @set="changeVersion" :force-disabled="!user.hasServerPermission(server, 'set.version') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span>
-    <br />
-    Software: <TextInput :default="server.software" @set="changeSoftware" :force-disabled="!user.hasServerPermission(server, 'set.software') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span>
-    <br />
-    Port: <TextInput :default="server.port.toString()" @set="changePort" :force-disabled="!user.hasServerPermission(server, 'set.port') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span>
-    <br />
+    <p>JVM Arguments: <TextField :default="server.jvmArgs" @set="changeJVMArgs" :force-disabled="!user.hasServerPermission(server, 'set.jvmArgs')" /></p>
+    <p>Version: <TextInput :default="server.version" @set="changeVersion" :force-disabled="!user.hasServerPermission(server, 'set.version') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span></p>
+    <p>Software: <TextInput :default="server.software" @set="changeSoftware" :force-disabled="!user.hasServerPermission(server, 'set.software') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span></p>
+    <p>Port: <TextInput :default="server.port.toString()" @set="changePort" :force-disabled="!user.hasServerPermission(server, 'set.port') || isRunning" /><span class="red-text" v-if="isRunning">Server is running!</span></p>
     <div class="auto">
-    Auto start: {{ server.autoStart ? "Yes" : "No" }} <button @click="changeAutoStart" :disabled="!user.hasServerPermission(server, 'set.autostart')">Change</button>
-    <br />
-    Auto restart: {{ server.autoRestart ? "Yes" : "No" }} <button @click="changeAutoRestart" :disabled="!user.hasServerPermission(server, 'set.autorestart')">Change</button>
-    <br />
-    Use Custom JVM args: {{ server.useCustomJVMArgs ? "Yes" : "No" }} <button @click="changeUseJVMArgs" :disabled="!user.hasServerPermission(server, 'set.usejvmargs')">Change</button></div></div>
+    <p>Auto start: {{ server.autoStart ? "Yes" : "No" }} <button @click="changeAutoStart" :disabled="!user.hasServerPermission(server, 'set.autostart')">Change</button></p>
+    <p>Auto restart: {{ server.autoRestart ? "Yes" : "No" }} <button @click="changeAutoRestart" :disabled="!user.hasServerPermission(server, 'set.autorestart')">Change</button></p>
+    <p>Use Custom JVM args: {{ server.useCustomJVMArgs ? "Yes" : "No" }} <button @click="changeUseJVMArgs" :disabled="!user.hasServerPermission(server, 'set.usejvmargs')">Change</button></p></div></div>
     <div v-if="user.hasPermission('users.view')">
         <hr />
         <h3>Allowed users</h3>
@@ -311,6 +303,7 @@ async function changeUseJVMArgs() {
 .red-text {
     color: #b13737;
     margin: 0!important;
+    margin-left: 10px!important;
 }
 
 .editing {
@@ -326,12 +319,26 @@ button {
 }
 
 hr {
-    margin: 10px;
-    color: #272729;
+    margin: 10px 0px;
+    height: 1px;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+p {
+    padding: 0px;
+    margin: 0px;
+    line-height: 1;
 }
 
 h2 {
     margin-bottom: 10px;
     margin-top: 5px;
+}
+
+.editing {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 51px - 40px);
+    overflow-y: auto;
 }
 </style>

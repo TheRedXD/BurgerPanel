@@ -59,85 +59,98 @@ async function getLog(logName: string) {
 }
 </script>
 <template>
-    <div class="button-container">
-    <RouterLink :to="{
-        name: 'editServer',
-        params: {
-            server: props.server
-        }
-    }" v-if="!viewingLog"><button class="smallbuttons">Go back</button></RouterLink>
+    <div class="logs">
+        <div class="button-container">
         <RouterLink :to="{
-        name: 'serverFiles',
-        params: {
-            server: props.server
-        }
-    }" v-if="!viewingLog && server && user.hasServerPermission(server, 'serverfiles.read')"><button class="smallbuttons">View all files</button></RouterLink></div>
-    <h1 v-if="!viewingLog">Logs for <span class="codeblock">{{ server?.name }}</span>:</h1>
-    <div v-for="log in logs" class="logname" v-if="!viewingLog">
-        <RouterLink :to="{
-            name: 'viewLogs',
-            params: {
-                server: props.server
-            },
-            query: {
-                log
-            }
-        }">{{ log }}
-        </RouterLink>
-    </div>
-    <div v-else>
-        <h1>{{ viewingLog }} in {{ server.name }}</h1><RouterLink :to="{
-            name: 'viewLogs',
+            name: 'editServer',
             params: {
                 server: props.server
             }
-        }"><button class="lastbutton">Go back</button></RouterLink>
-        <textarea readonly>{{ logData }}</textarea>
+        }" v-if="!viewingLog"><button class="smallbuttons">Go back</button></RouterLink>
+            <RouterLink :to="{
+            name: 'serverFiles',
+            params: {
+                server: props.server
+            }
+        }" v-if="!viewingLog && server && user.hasServerPermission(server, 'serverfiles.read')"><button class="smallbuttons">View all files</button></RouterLink></div>
+        <h1 v-if="!viewingLog">Logs for <span class="codeblock">{{ server?.name }}</span>:</h1>
+        <div class="logs-list">
+            <div v-for="log in logs" class="logname" v-if="!viewingLog">
+                <RouterLink :to="{
+                    name: 'viewLogs',
+                    params: {
+                        server: props.server
+                    },
+                    query: {
+                        log
+                    }
+                }">{{ log }}
+                </RouterLink>
+            </div>
+            <div v-else>
+                <h1>{{ viewingLog }} in {{ server.name }}</h1><RouterLink :to="{
+                    name: 'viewLogs',
+                    params: {
+                        server: props.server
+                    }
+                }"><button class="lastbutton">Go back</button></RouterLink>
+                <textarea readonly>{{ logData }}</textarea>
+            </div>
+        </div>
     </div>
 </template>
 <style scoped>
-    .button-container {
-        margin-top: 10px;
-        margin-left: 20px;
-    }
-    .lastbutton {
-        margin-left: 40px;
-        margin-bottom: 10px;
-    }
-    .smallbuttons {
-        margin-right: 5px;
-    }
-    .logname {
-        display:block;
-        background-color: #3b3a3a60;
-        border-radius: 10px;
-        margin: 1px 20px;
-        border: 1px solid #494949;
-        transition: .1s ease-in-out;
-    }
-    .logname:last-child {
-        margin-bottom: 20px;
-    }
-    .logname:hover {
-        background-color: #4b4a4a80;
-    }
-    .logname a {
-        display: block;
-        padding: 10px;
-    }
-    .logname i {
-        margin-right: 10px;
-        color: #8d8d8d;
-    }
-    .logname:hover i {
-        color: white;
-    }
-    textarea {
+.logs {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 51px - 40px);
+    padding: 20px;
+    overflow-y: auto;
+}
+.logs-list {
+    height: calc(100% - 51px - 45px);
+    overflow-y: auto;
+}
+.button-container {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+.lastbutton {
+    margin-left: 40px;
+    margin-bottom: 10px;
+}
+.smallbuttons {
+    margin-right: 5px;
+}
+.logname {
+    display:block;
+    background-color: #3b3a3a60;
+    border-radius: 10px;
+    margin: 1px 20px;
+    border: 1px solid #494949;
+    transition: .1s ease-in-out;
+}
+.logname:last-child {
+    margin-bottom: 20px;
+}
+.logname:hover {
+    background-color: #4b4a4a80;
+}
+.logname a {
+    display: block;
+    padding: 10px;
+}
+.logname i {
+    margin-right: 10px;
+    color: #8d8d8d;
+}
+.logname:hover i {
+    color: white;
+}
+textarea {
     resize: none;
     width: 95%;
-    height: calc(100vh - 220px);
+    height: calc(100vh - 220px - 40px - 51px);
     overflow-y: scroll;
-    border-radius: 7px;
     /* Center */
     margin-left: auto;
     margin-right: auto;
@@ -145,31 +158,32 @@ async function getLog(logName: string) {
     /* Color */
     background-color: #0e0e0e;
     border: 1px solid #302e2c;
+    border-radius: 7px!important;
     color: #e8dc8d;
     padding: 10px;
     outline: none;
-    }
-    a {
-        text-decoration: none;
-        color: white;
-    }
-    h1 {
-        padding: 15px;
-        padding-left:20px;
-        font-size: 30px;
-    }
-    button {
-        background-color: #3b3a3a80;
-        border: 1px solid #494949;
-        color: white;
-    }
-    button:hover {
-        background-color: #4b4a4aa0;
-    }
-    .logname .filesize {
-        float: right;
-        margin-right: 10px;
-        color: #686868;
-        /* margin-right: -25px; */
-    }
+}
+a {
+    text-decoration: none;
+    color: white;
+}
+h1 {
+    padding: 15px;
+    padding-left:20px;
+    font-size: 30px;
+}
+button {
+    background-color: #3b3a3a80;
+    border: 1px solid #494949;
+    color: white;
+}
+button:hover {
+    background-color: #4b4a4aa0;
+}
+.logname .filesize {
+    float: right;
+    margin-right: 10px;
+    color: #686868;
+    /* margin-right: -25px; */
+}
 </style>

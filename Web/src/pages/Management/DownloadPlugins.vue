@@ -83,86 +83,125 @@ async function downloadPlugin(version: MRVersion, hash: string, pluginName: stri
 </script>
 
 <template>
-    <div id="head">
-        <h1>{{server.software == "fabric" ? "Mod" : "Plugin"}} downloader for {{ server.name }}</h1>
-        <form @submit.prevent="search">
-            <TextInput default="" :modal-mode="true" :initial-editing="true" @set="q => query = q" placeholder="Search for plugins..." />
-        </form>
-        <RouterLink :to="{
-            name: 'editServer',
-            params: {
-                server: props.server
-            }
-        }"><button>Back to server page</button></RouterLink>
-        <h3 v-if="loading">Loading plugins...</h3>
-        <div v-if="hits?.length == 0 && !loading">
-            Nothing found :&#40;
-        </div>
-    </div>
-    <div v-for="plugin of hits" class="hit" @click="viewPluginInfo(plugin.slug)" :key="plugin.project_id">
-        <div :style="{display: 'flex'}">
-            <img :src="plugin.icon_url" v-if="plugin.icon_url">
-            <h2 class="plugin-title">{{ plugin.title }}</h2>
-        </div>
-        <p class="plugin-desc">{{ plugin.description }}</p>
-    </div>
-    <br/>
-    <Modal :button-type="''" v-if="viewingPlugin" @close-btn-clicked="viewingPlugin = ''" :custom-max-width="1300" :hide-scrollbar="true">
-        <div v-if="viewingPluginInfo" class="modaldata">
-            <div :style="{display: 'flex'}">
-                <img :src="viewingPluginInfo.icon_url" v-if="viewingPluginInfo.icon_url">
-                <div class="plugin-modal-title" @click="openModrinth(viewingPluginInfo.slug)">
-                    <h2>{{ viewingPluginInfo.title }}</h2>
-                    <p style="font-size: 0.5rem;">Click to open in Modrinth</p>
-                </div>
+    <div class="downloader">
+        <div id="head">
+            <h1>{{server.software == "fabric" ? "Mod" : "Plugin"}} downloader for: <span>{{ server.name }}</span></h1>
+            <form @submit.prevent="search">
+                <TextInput default="" :modal-mode="true" :initial-editing="true" @set="q => query = q" :placeholder="'Search for ' + (server.software == 'fabric' ? 'mods' : 'plugins') + '...'" />
+            </form>
+            <RouterLink :to="{
+                name: 'editServer',
+                params: {
+                    server: props.server
+                }
+            }"><button>Back to server page</button></RouterLink>
+            <h3 v-if="loading" class="loading">Loading plugins...</h3>
+            <div v-if="hits?.length == 0 && !loading" class="nothing-found">
+                Nothing found :&#40; If the mod is not on modrinth, you can install it manually through the <RouterLink :to="{name: 'serverFiles', params: {
+                  server: props.server
+                }}">Files</RouterLink> page.
+                <!-- gaming -->
             </div>
-            <br>
-            <div class="plugin-modal-content">
-                <!-- <a :href="'https://modrinth.com/plugin/' + viewingPluginInfo.slug" target="_blank" :style="{color: '#00da72'}">
-                    <button>Open in Modrinth</button>
-                </a> -->
-                <pre class="plugin-modal-desc">{{ viewingPluginInfo.description }}</pre>
-                <h3 v-if="viewingPluginInfo.source_url || viewingPluginInfo.wiki_url">Links</h3>
-                <a v-if="viewingPluginInfo.source_url" :href="viewingPluginInfo.source_url" target="_blank"><p>Source Code</p></a>
-                <a v-if="viewingPluginInfo.wiki_url" :href="viewingPluginInfo.wiki_url" target="_blank"><p>Wiki</p></a>
-                <button @click="getVersions(viewingPluginInfo.slug)" v-if="!versions">Download</button>
-                <div v-if="versions" v-for="version of versions">
-                    <button @click="selectedVersion == version.id ? selectedVersion = undefined : selectedVersion = version.id">{{ version.name }}</button>
-                    <div class="selected-version" v-if="selectedVersion == version.id">
-                        <div class="box">
-                            <h3>{{ version.name }}</h3>
-                            <p>Released at {{ new Date(version.date_published).toLocaleString() }}</p>
-                            <br/>
-                            <h4>Files</h4>
-                            <div v-for="file of version.files">
-                                <button @click="downloadPlugin(version, file.hashes.sha512, viewingPluginInfo.title, file.filename)">{{ file.filename }}</button>
-                            </div>
-                            <button v-if="!showChangelog" @click="showChangelog = true">Show changelog</button>
-                            <h2 v-if="showChangelog">Changelog</h2>
-                            <div class="md-plugin-modal changelog" v-if="showChangelog" v-html="parseMDSecurely(version.changelog)"></div>
-                        </div>
-                        <br/>
+        </div>
+        <div class="hits">
+            <div v-for="plugin of hits" class="hit" @click="viewPluginInfo(plugin.slug)" :key="plugin.project_id">
+                <div :style="{display: 'flex'}">
+                    <img :src="plugin.icon_url" v-if="plugin.icon_url">
+                    <h2 class="plugin-title">{{ plugin.title }}</h2>
+                </div>
+                <p class="plugin-desc">{{ plugin.description }}</p>
+            </div>
+        </div>
+        <br/>
+        <Modal :button-type="''" v-if="viewingPlugin" @close-btn-clicked="viewingPlugin = ''" :custom-max-width="1300" :hide-scrollbar="true" class="modal">
+            <div v-if="viewingPluginInfo" class="modaldata">
+                <div :style="{display: 'flex'}">
+                    <img :src="viewingPluginInfo.icon_url" v-if="viewingPluginInfo.icon_url">
+                    <div class="plugin-modal-title" @click="openModrinth(viewingPluginInfo.slug)">
+                        <h2>{{ viewingPluginInfo.title }}</h2>
+                        <p style="font-size: 0.5rem;">Click to open in Modrinth</p>
                     </div>
                 </div>
-                <div v-html="parseMDSecurely(viewingPluginInfo.body)" class="md-plugin-modal" />
-                <br v-if="viewingPluginInfo.gallery.length != 0"/>
-                <button @click.prevent="showImages = !showImages" href="#" v-if="viewingPluginInfo.gallery.length != 0">{{ showImages ? "Hide" : "Show" }} images</button>
-                <div v-for="img of viewingPluginInfo.gallery" v-if="showImages">
-                    <br>
-                    <pre>{{ img.title }}</pre>
-                    <img :src="img.url" class="gallery-img">
+                <br>
+                <div class="plugin-modal-content">
+                    <!-- <a :href="'https://modrinth.com/plugin/' + viewingPluginInfo.slug" target="_blank" :style="{color: '#00da72'}">
+                        <button>Open in Modrinth</button>
+                    </a> -->
+                    <pre class="plugin-modal-desc">{{ viewingPluginInfo.description }}</pre>
+                    <h3 v-if="viewingPluginInfo.source_url || viewingPluginInfo.wiki_url">Links</h3>
+                    <a v-if="viewingPluginInfo.source_url" :href="viewingPluginInfo.source_url" target="_blank"><p>Source Code</p></a>
+                    <a v-if="viewingPluginInfo.wiki_url" :href="viewingPluginInfo.wiki_url" target="_blank"><p>Wiki</p></a>
+                    <button @click="getVersions(viewingPluginInfo.slug)" v-if="!versions">Download</button>
+                    <div v-if="versions" v-for="version of versions">
+                        <button @click="selectedVersion == version.id ? selectedVersion = undefined : selectedVersion = version.id">{{ version.name }}</button>
+                        <div class="selected-version" v-if="selectedVersion == version.id">
+                            <div class="box">
+                                <h3>{{ version.name }}</h3>
+                                <p>Released at {{ new Date(version.date_published).toLocaleString() }}</p>
+                                <br/>
+                                <h4>Files</h4>
+                                <div v-for="file of version.files">
+                                    <button @click="downloadPlugin(version, file.hashes.sha512, viewingPluginInfo.title, file.filename)">{{ file.filename }}</button>
+                                </div>
+                                <button v-if="!showChangelog" @click="showChangelog = true">Show changelog</button>
+                                <h2 v-if="showChangelog">Changelog</h2>
+                                <div class="md-plugin-modal changelog" v-if="showChangelog" v-html="parseMDSecurely(version.changelog)"></div>
+                            </div>
+                            <br/>
+                        </div>
+                    </div>
+                    <div v-html="parseMDSecurely(viewingPluginInfo.body)" class="md-plugin-modal" />
+                    <br v-if="viewingPluginInfo.gallery.length != 0"/>
+                    <button @click.prevent="showImages = !showImages" href="#" v-if="viewingPluginInfo.gallery.length != 0">{{ showImages ? "Hide" : "Show" }} images</button>
+                    <div v-for="img of viewingPluginInfo.gallery" v-if="showImages">
+                        <br>
+                        <pre>{{ img.title }}</pre>
+                        <img :src="img.url" class="gallery-img">
+                    </div>
                 </div>
             </div>
-        </div>
-        <div v-else>
-            Loading '{{ viewingPlugin }}'...
-        </div>
-    </Modal>
+            <div v-else>
+                Loading '{{ viewingPlugin }}'...
+            </div>
+        </Modal>
+    </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+.nothing-found {
+    margin-top: 10px;
+    margin-left: 5px;
+}
+.loading {
+    margin: 10px 0px;
+    font-weight: 400;
+}
+.downloader {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 51px);
+    overflow-y: auto;
+    width: calc(100vw - 40px);
+}
+.hits {
+    overflow-y: auto;
+    height: 100%;
+    margin-bottom: 25px;
+}
 #head {
-    margin-left: 2.5vw;
+    padding: 20px;
+    h1 {
+        margin-bottom: 10px;
+        font-weight: 400;
+        span {
+            color: #888888;
+        }
+    }
+    button {
+        border-radius: 5px;
+        padding: 8px 15px;
+        margin-top: 5px;
+    }
 }/*.modaldata > div > div > img {
     width: 500px;
     margin-right: 25px !important;
@@ -183,6 +222,7 @@ async function downloadPlugin(version: MRVersion, hash: string, pluginName: stri
 .changelog {
     margin-left: 10px;
 }
+
 .plugin-modal-title {
     display: flex;
     justify-content: center;
@@ -225,9 +265,14 @@ async function downloadPlugin(version: MRVersion, hash: string, pluginName: stri
     margin: 0 auto;
     align-items: center;
     border-radius: 10px;
-    background-color: #2e2e2e;
+    background-color: #222222;
+    border: 1px solid #2a2a2a;
     margin-top: 10px;
     padding: 10px;
+    transition: all .05s ease-in-out;
+    &:hover {
+        background-color: #282828;
+    }
 }
 
 .hit > div >  h2 {
@@ -252,12 +297,31 @@ async function downloadPlugin(version: MRVersion, hash: string, pluginName: stri
     text-decoration: none;
 }
 </style>
-<style>
+<style lang="scss">
 .md-plugin-modal img {
     max-width: 500px;
     max-height: 500px;
 }
 .md-plugin-modal::-webkit-scrollbar {
     display: none;
+}
+
+#head {
+    input {
+        padding: 8px 15px;
+        border-radius: 5px;
+    }
+}
+a {
+    color: #888888;
+    margin-bottom: 5px;
+    transition: all .05s ease-in-out;
+    &:hover {
+        color: #aaaaaa;
+    }
+}
+img {
+    border-radius: 5px;
+    border: 1px solid #2a2a2a;
 }
 </style>

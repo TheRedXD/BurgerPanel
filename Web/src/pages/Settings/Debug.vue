@@ -62,86 +62,131 @@ let dropdown = ref();
 </script>
 
 <template>
-<div v-if="showWarning">
-    <h1>WARNING</h1>
-    <p>This is a page for debugging Burgerpanel. It should not be screenshotted, screenshared, or shared in any other way with anyone you do not trust.</p>
-    <p>Your own token and hashed password will be visible</p>
-    <p>Some data of other users may be viewed.</p>
-    <br/>
-    <p>Are you sure you want to open this?</p>
-    <button @click="showWarning = false">I understand the risks</button>
-</div>
-<div v-else>
-    <button @click="e => dropdown.show(e)">Dropdown</button>
-    <div @focus="dropdown.hide()">
-        <Dropdown ref="dropdown" :create-on-cursor="true">
-            Hello World!
-        </Dropdown>
-    </div>
-    <h2>My user</h2>
-    <pre>{{ user.user }}</pre>
-    <hr/>
-    <h2>Settings</h2>
-    <div v-if="shownSettings">
-        <pre>{{ shownSettings }}</pre>
-    </div>
-    <div v-else>
-        <button @click="showSettings">Get</button>
-    </div>
-    <hr/>
-    <h1>Users</h1>
-    <div v-if="allUsers.length != 0" v-for="user in allUsers">
-        <pre>{{ user }}</pre>
-    </div>
-    <div v-else>
-        <button @click="showUsers">Get</button>
-    </div>
-    <hr/>
-    <div>
-        <h1>Request sender</h1>
-        <select v-model="packetName">
-            <option v-for="packet in packets">
-                {{ packet }}
-            </option>
-        </select>
-    </div>
-    <div v-if="packetName">
-        <textarea v-model="packetData" :style="{width: '500px', height: '250px'}" />
-        <br/>
-        <button @click="sendPacket">Send</button>
-        <h3>Output</h3>
-        <textarea readonly v-model="requestResponse" :style="{width: '500px', height: '250px'}" />
-    </div>
-    <hr/>
-    <h1>Modal debug</h1>
-    <textarea v-model="modalInputData" :style="{width: '500px', height: '250px'}" />
-    <br/>
-    <button @click="createModal">Create modal</button>
-    <h3>Output</h3>
-    <textarea readonly v-model="modalOutputData" :style="{width: '500px', height: '250px'}"></textarea>
-    <hr/>
-    <h1>Build Info</h1>
-    <p v-for="info of Object.keys(buildInfo)">
-        {{ info }}: {{ // @ts-ignore typescript stupidity
-        buildInfo[info] }}
-    </p>
-    <hr>
-    <h1>Developer mode</h1>
-        <p>Developer mode for your account is currently <b>{{ user.user?.devMode ? "enabled" : "disabled" }}</b>.</p>
-        <button @click="toggleDevMode">{{ user.user?.devMode ? "Disable" : "Enable" }}</button>
-        <div v-if="user.user?.devMode">
-            Example:<br/>
-            <div :style="{backgroundColor: '#000000', width: 'fit-content', padding: '10px', margin: '10px', borderRadius: '5px'}">curl {{ API_URL }}/api/request/auth \<br/>
-                --request POST \<br/>
-                --header "Content-Type: application/json" \<br/>
-                --header "Authorization: {{ user.user.token }}" \<br/>
-                --data "{}"
-            </div>
-            To get your current login data. See <a href="https://github.com/TheBlueBurger/BurgerPanel/tree/master/Server/src/packets" target="_blank"> here</a> for all types and <a href="https://github.com/TheBlueBurger/BurgerPanel/blob/master/Share/Requests.ts" target="_blank">here</a> for their responses.
+    <div class="container">
+        <div v-if="showWarning" class="debug">
+            <h1>WARNING</h1>
+            <p>This is a page for debugging Burgerpanel. It should not be screenshotted, screenshared, or shared in any other way with anyone you do not trust.</p>
+            <p>Your own token and hashed password will be visible</p>
+            <p>Some data of other users may be viewed.</p>
             <br/>
-            <br/>
+            <p>Are you sure you want to open this?</p>
+            <button @click="showWarning = false">I understand the risks</button>
         </div>
-    <hr/>
-    Need help? <a href="https://github.com/TheBlueBurger/BurgerPanel/discussions/new?category=support" target="_blank">Create a support ticket</a>
-</div>
+        <div v-else class="debug">
+            <h2>My user</h2>
+            <pre>{{ user.user }}</pre>
+            <button @click="e => dropdown.show(e)">Dropdown</button>
+            <div @focus="dropdown.hide()">
+                <Dropdown ref="dropdown" :create-on-cursor="true">
+                    Hello World!
+                </Dropdown>
+            </div>
+            <hr/>
+            <h2>Settings</h2>
+            <div v-if="shownSettings">
+                <pre>{{ shownSettings }}</pre>
+            </div>
+            <div v-else>
+                <button @click="showSettings">Get</button>
+            </div>
+            <hr/>
+            <h1>Users</h1>
+            <div v-if="allUsers.length != 0" v-for="user in allUsers">
+                <pre>{{ user }}</pre>
+            </div>
+            <div v-else>
+                <button @click="showUsers">Get</button>
+            </div>
+            <hr/>
+            <div>
+                <h1>Request sender</h1>
+                <select v-model="packetName">
+                    <option v-for="packet in packets">
+                        {{ packet }}
+                    </option>
+                </select>
+            </div>
+            <div v-if="packetName">
+                <textarea v-model="packetData" :style="{width: '500px', height: '250px'}" />
+                <br/>
+                <button @click="sendPacket">Send</button>
+                <h3>Output</h3>
+                <textarea readonly v-model="requestResponse" :style="{width: '500px', height: '250px'}" />
+            </div>
+            <hr/>
+            <h1>Modal debug</h1>
+            <textarea v-model="modalInputData" :style="{width: '500px', height: '250px'}" />
+            <br/>
+            <button @click="createModal">Create modal</button>
+            <br/>
+            <br/>
+            <h3>Output</h3>
+            <textarea readonly v-model="modalOutputData" :style="{width: '500px', height: '250px'}"></textarea>
+            <hr/>
+            <h1>Build Info</h1>
+            <p v-for="info of Object.keys(buildInfo)">
+                {{ info }}: {{ // @ts-ignore typescript stupidity
+                buildInfo[info] }}
+            </p>
+            <hr>
+            <h1>Developer mode</h1>
+            <p>Developer mode for your account is currently <b>{{ user.user?.devMode ? "enabled" : "disabled" }}</b>.</p>
+            <button @click="toggleDevMode">{{ user.user?.devMode ? "Disable" : "Enable" }}</button>
+            <div v-if="user.user?.devMode">
+                Example:<br/>
+                <div :style="{backgroundColor: '#000000', width: 'fit-content', padding: '10px', margin: '10px', borderRadius: '5px'}">curl {{ API_URL }}/api/request/auth \<br/>
+                    --request POST \<br/>
+                    --header "Content-Type: application/json" \<br/>
+                    --header "Authorization: {{ user.user.token }}" \<br/>
+                    --data "{}"
+                </div>
+                To get your current login data. See <a href="https://github.com/TheBlueBurger/BurgerPanel/tree/master/Server/src/packets" target="_blank"> here</a> for all types and <a href="https://github.com/TheBlueBurger/BurgerPanel/blob/master/Share/Requests.ts" target="_blank">here</a> for their responses.
+                <br/>
+                <br/>
+            </div>
+            <hr/>
+            Need help? <a href="https://github.com/TheBlueBurger/BurgerPanel/discussions/new?category=support" target="_blank">Create a support ticket</a>
+        </div>
+    </div>
 </template>
+
+<style scoped lang="scss">
+.container {
+    display: block;
+    height: calc(100vh - 51px);
+    overflow-y: auto;
+    width: 100vw;
+}
+.debug {
+    padding: 10px 20px;
+}
+select {
+    margin-top: 5px;
+}
+a {
+    color: #888888;
+    margin-bottom: 5px;
+    transition: all .05s ease-in-out;
+    &:hover {
+        color: #aaaaaa;
+    }
+}
+h1, h2 {
+    margin-bottom: 5px;
+}
+</style>
+<style lang="scss">
+textarea {
+    padding: 10px;
+    margin-top: 10px;
+}
+hr {
+    margin: 10px 0px;
+    height: 1px;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
+}
+button {
+    margin: 5px 0px;
+}
+</style>

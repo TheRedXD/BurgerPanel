@@ -301,160 +301,168 @@
     }
 </script>
 <template>
-    <a style="position: absolute;visibility: hidden;" ref="downloadAnchor" />
-    <Modal button-type="" @close-btn-clicked="showNewDialog = false" v-if="showNewDialog">
-        <h1 style="margin-bottom:10px">New</h1>
-        <TextInput :modal-mode="true" default="" @set="a => newName = a" :initial-editing="true" placeholder="Name" />
-        <br/>
-        <button :style="{
-            backgroundColor: newType == 'file' ? '#e3dede' : undefined,
-            color: newType == 'file' ? 'black' : 'white',
-            marginBottom: '15px'
-        }" @click="newType = 'file'" :disabled="newType == 'file'">File</button><button :style="{
-            backgroundColor: newType == 'folder' ? '#e3dede' : undefined,
-            color: newType == 'folder' ? 'black' : 'white'
-        }" @click="newType = 'folder'" :disabled="newType == 'folder'">Folder</button>
-        <br v-if="newType != 'folder'"/>
-        <div v-if="newType == 'folder'">
-            Enter folder when created <input type="checkbox" v-model="openWhenCreated">
-        </div>
-        <button @click="createNew">Create</button>
-    </Modal>
-    <Modal button-type="" @close-btn-clicked="showMoveDialog = false" v-if="showMoveDialog">
-    <h1>Moving {{ dropdownFile.name }}</h1>
-    Move to:
-    <div v-for="folder of ['.', '..', ...files?.filter(f => f.folder).map(f => f.name) ?? []]">
-        <button @click="selectedMoveToFolder = folder" :style="{
-            backgroundColor: selectedMoveToFolder == folder ? '#737475' : undefined
-        }" :disabled="['', '/'].includes(path.toString()) && folder == '..'">{{ folder }}</button>
-    </div>
-    <input type="text" placeholder="Name" v-model="selectedMoveToName"><button @click="moveFile">Move</button><br/>
-    {{ (path + "/" + dropdownFile.name).replace("//", "/") }} will be moved to {{ (path + "/" +selectedMoveToFolder + "/" + selectedMoveToName).replaceAll("/./", "/").replaceAll("//", "/") }}
-    </Modal>
-    <Modal v-if="showUploadModal" :button-type="''" @close-btn-clicked="closeModal">
-        <div v-if="!uploading">
-            <div id="upload-modal-drop-div" @dragover.prevent="slightlyWhiteDivBg = true" @drop.prevent="onDrop" @dragenter.prevent="console.log('drag');slightlyWhiteDivBg = true" @dragleave.prevent="console.log('undrag');slightlyWhiteDivBg = false" :class="{
-                slightlyWhite: slightlyWhiteDivBg
-            }" @click="modalFileChooser?.click()">
-                <p>Drop files here or click to open file chooser</p>
-                <input type="file" style="visibility:hidden;position:absolute;" ref="modalFileChooser" multiple @change.prevent="e => {
-                    addFiles((e.target as HTMLInputElement).files);
-                }">
-            </div>
-            <div v-if="toUpload.length != 0">
-                <div v-for="file of toUpload" class="file-item">
-                    {{ file.name }} ({{ (file?.size ?? 0) / 1_000_000 }}MB) <span style="color: red;">{{ file.size > 100_000_000 ? "Too big! " : " " }}</span><button @click="removeFromUploads(file)">Delete</button>
-                </div>
-                <button @click="uploadFiles">Upload {{ toUpload.length }} file{{ toUpload.length == 1 ? '' : 's' }}</button>
-            </div>
-        </div>
-        <div v-else style="width:350px">
-            {{ currentUploading?.name }}
+    <div class="files">
+        <a style="position: absolute;visibility: hidden;" ref="downloadAnchor" />
+        <Modal button-type="" @close-btn-clicked="showNewDialog = false" v-if="showNewDialog">
+            <h1 style="margin-bottom:10px">New</h1>
+            <TextInput :modal-mode="true" default="" @set="a => newName = a" :initial-editing="true" placeholder="Name" />
             <br/>
-            <div :style="{
-                width: '290px',
-                height: '5px',
-                borderRadius: '3px',
-                margin: '0 auto',
-                marginTop: '10px',
-                marginBottom: '10px',
-                border: 'white 1px solid'
-            }">
-                <div id="bar" :style="{
-                    backgroundColor: 'white',
+            <button :style="{
+                backgroundColor: newType == 'file' ? '#e3dede' : undefined,
+                color: newType == 'file' ? 'black' : 'white',
+                marginBottom: '15px'
+            }" @click="newType = 'file'" :disabled="newType == 'file'">File</button><button :style="{
+                backgroundColor: newType == 'folder' ? '#e3dede' : undefined,
+                color: newType == 'folder' ? 'black' : 'white'
+            }" @click="newType = 'folder'" :disabled="newType == 'folder'">Folder</button>
+            <br v-if="newType != 'folder'"/>
+            <div v-if="newType == 'folder'">
+                Enter folder when created <input type="checkbox" v-model="openWhenCreated">
+            </div>
+            <button @click="createNew">Create</button>
+        </Modal>
+        <Modal button-type="" @close-btn-clicked="showMoveDialog = false" v-if="showMoveDialog">
+        <h1>Moving {{ dropdownFile.name }}</h1>
+        Move to:
+        <div v-for="folder of ['.', '..', ...files?.filter(f => f.folder).map(f => f.name) ?? []]">
+            <button @click="selectedMoveToFolder = folder" :style="{
+                backgroundColor: selectedMoveToFolder == folder ? '#737475' : undefined
+            }" :disabled="['', '/'].includes(path.toString()) && folder == '..'">{{ folder }}</button>
+        </div>
+        <input type="text" placeholder="Name" v-model="selectedMoveToName"><button @click="moveFile">Move</button><br/>
+        {{ (path + "/" + dropdownFile.name).replace("//", "/") }} will be moved to {{ (path + "/" +selectedMoveToFolder + "/" + selectedMoveToName).replaceAll("/./", "/").replaceAll("//", "/") }}
+        </Modal>
+        <Modal v-if="showUploadModal" :button-type="''" @close-btn-clicked="closeModal">
+            <div v-if="!uploading">
+                <div id="upload-modal-drop-div" @dragover.prevent="slightlyWhiteDivBg = true" @drop.prevent="onDrop" @dragenter.prevent="console.log('drag');slightlyWhiteDivBg = true" @dragleave.prevent="console.log('undrag');slightlyWhiteDivBg = false" :class="{
+                    slightlyWhite: slightlyWhiteDivBg
+                }" @click="modalFileChooser?.click()">
+                    <p>Drop files here or click to open file chooser</p>
+                    <input type="file" style="visibility:hidden;position:absolute;" ref="modalFileChooser" multiple @change.prevent="e => {
+                        addFiles((e.target as HTMLInputElement).files);
+                    }">
+                </div>
+                <div v-if="toUpload.length != 0">
+                    <div v-for="file of toUpload" class="file-item">
+                        {{ file.name }} ({{ (file?.size ?? 0) / 1_000_000 }}MB) <span style="color: red;">{{ file.size > 100_000_000 ? "Too big! " : " " }}</span><button @click="removeFromUploads(file)">Delete</button>
+                    </div>
+                    <button @click="uploadFiles">Upload {{ toUpload.length }} file{{ toUpload.length == 1 ? '' : 's' }}</button>
+                </div>
+            </div>
+            <div v-else style="width:350px">
+                {{ currentUploading?.name }}
+                <br/>
+                <div :style="{
+                    width: '290px',
                     height: '5px',
-                    width: ((parseInt(totalPercentage.toString()) * 2.9) + 'px')
-                }" />
+                    borderRadius: '3px',
+                    margin: '0 auto',
+                    marginTop: '10px',
+                    marginBottom: '10px',
+                    border: 'white 1px solid'
+                }">
+                    <div id="bar" :style="{
+                        backgroundColor: 'white',
+                        height: '5px',
+                        width: ((parseInt(totalPercentage.toString()) * 2.9) + 'px')
+                    }" />
+                </div>
+                <div style="text-align: center;">
+                    {{ (uploadTotal / 1_000_000).toFixed(3) }}/{{ ((totalSize ?? 0) / 1_000_000).toFixed(3) }}MB @ {{ ((uploadProgress?.rate??0)/1000).toFixed(2) }} KB/s<br/>
+                    <span style="float:left">ETA: {{ Math.floor(eta / 60) }}m {{ Math.floor(eta % 60) }}s</span>
+                    {{ totalPercentage.toFixed(2) }}%
+                    <span style="float:right">{{ uploaded.length }} / {{ totalUploadCount }} completed</span>
+                </div>
             </div>
-            <div style="text-align: center;">
-                {{ (uploadTotal / 1_000_000).toFixed(3) }}/{{ ((totalSize ?? 0) / 1_000_000).toFixed(3) }}MB @ {{ ((uploadProgress?.rate??0)/1000).toFixed(2) }} KB/s<br/>
-                <span style="float:left">ETA: {{ Math.floor(eta / 60) }}m {{ Math.floor(eta % 60) }}s</span>
-                {{ totalPercentage.toFixed(2) }}%
-                <span style="float:right">{{ uploaded.length }} / {{ totalUploadCount }} completed</span>
-            </div>
-        </div>
-    </Modal>
-    <div v-if="!finishedLoading">
+        </Modal>
+        <div v-if="!finishedLoading">
 
-    </div>
-    <div v-else-if="!readingFile">
-        <h1 class="filesin">Files in {{ server.name }}{{ path }} <RouterLink :to="{
-        name: 'editServer',
-        params: {
-            server: props.server
-        }
-    }"><button class="back-server-page-btn">Server Page</button></RouterLink><button class="back-server-page-btn" @click="openUploadModal">Upload files</button><RouterLink :to="{
-        name: 'downloadPlugins',
-        params: {
-            server: props.server
-        }
-    }" v-if="path && path.toString().startsWith('/plugins') && hasServerPermission(user.user, server, 'plugins.download')">
-        <button class="back-server-page-btn">Download {{server.software == "fabric" ? "mods" : "plugins"}}</button>
-    </RouterLink><button class="back-server-page-btn" @click="newName = '';showNewDialog = true">New</button></h1>
-    <Dropdown :create-on-cursor="true" ref="dropdown">
-        <div id="dropdown-inner">
-            <button @click="() => {
-                router.push({
-                    query: {
-                        path: (path + '\/' + dropdownFile.name).replaceAll('\/\/', '\/'),
-                        type: 'read'
+        </div>
+        <div v-else-if="!readingFile">
+            <h1 class="filesin">Files in {{ server.name }}{{ path }} <RouterLink :to="{
+            name: 'editServer',
+            params: {
+                server: props.server
+            }
+        }"><button class="back-server-page-btn">Server Page</button></RouterLink><button class="back-server-page-btn" @click="openUploadModal">Upload files</button><RouterLink :to="{
+            name: 'downloadPlugins',
+            params: {
+                server: props.server
+            }
+        }" v-if="path && path.toString().startsWith('/plugins') && hasServerPermission(user.user, server, 'plugins.download')">
+            <button class="back-server-page-btn">Download {{server.software == "fabric" ? "mods" : "plugins"}}</button>
+        </RouterLink><button class="back-server-page-btn" @click="newName = '';showNewDialog = true">New</button></h1>
+        <Dropdown :create-on-cursor="true" ref="dropdown">
+            <div id="dropdown-inner">
+                <button @click="() => {
+                    router.push({
+                        query: {
+                            path: (path + '\/' + dropdownFile.name).replaceAll('\/\/', '\/'),
+                            type: 'read'
+                        }
+                    })
+                }">Open</button><br v-if="hasServerPermission(user.user, server, 'serverfiles.delete')/* && !dropdownFile.folder*/"/>
+                <button v-if="hasServerPermission(user.user, server, 'serverfiles.delete')/* && !dropdownFile.folder*/" @click="async () => {
+                    dropdown.hide();
+                    if(await confirmModal(`Delete ${dropdownFile.name}?`, `Sure you want to delete ${dropdownFile.name}? This can't be undone.`, true, true, true)) {
+                        await sendRequest('serverFiles', {
+                            id: props.server,
+                            action: 'delete',
+                            path: path + '/' + dropdownFile.name
+                        });
+                        getFiles();
+                        event.emit('createNotification', `${dropdownFile.name} has been removed.`)
                     }
-                })
-            }">Open</button><br v-if="hasServerPermission(user.user, server, 'serverfiles.delete') && !dropdownFile.folder"/>
-            <button v-if="hasServerPermission(user.user, server, 'serverfiles.delete') && !dropdownFile.folder" @click="async () => {
-                dropdown.hide();
-                if(await confirmModal(`Delete ${dropdownFile.name}?`, `Sure you want to delete ${dropdownFile.name}? This can't be undone.`, true, true, true)) {
-                    await sendRequest('serverFiles', {
-                        id: props.server,
-                        action: 'delete',
-                        path: path + '/' + dropdownFile.name
-                    });
-                    getFiles();
-                    event.emit('createNotification', `${dropdownFile.name} has been removed.`)
+                }">Delete</button><br v-if="hasServerPermission(user.user, server, 'serverfiles.download') && !dropdownFile.folder">
+                <button v-if="hasServerPermission(user.user, server, 'serverfiles.download') && !dropdownFile.folder" @click="downloadFile(path + '/' + dropdownFile.name)">Download</button>
+                <br v-if="hasServerPermission(user.user, server, 'serverfiles.rename')">
+                <button v-if="hasServerPermission(user.user, server, 'serverfiles.rename')" @click="dropdown.hide();selectedMoveToName = dropdownFile.name;showMoveDialog = true">Move/rename</button>
+            </div>
+        </Dropdown>
+        <div class="serverfiles">
+
+            <RouterLink v-if="!['','/'].includes(path.toString())" :to="{
+                query: {
+                    path: path.toString().split('/').slice(0, -1).join('/')
                 }
-            }">Delete</button><br v-if="hasServerPermission(user.user, server, 'serverfiles.download') && !dropdownFile.folder">
-            <button v-if="hasServerPermission(user.user, server, 'serverfiles.download') && !dropdownFile.folder" @click="downloadFile(path + '/' + dropdownFile.name)">Download</button>
-            <br v-if="hasServerPermission(user.user, server, 'serverfiles.rename')">
-            <button v-if="hasServerPermission(user.user, server, 'serverfiles.rename')" @click="dropdown.hide();selectedMoveToName = dropdownFile.name;showMoveDialog = true">Move/rename</button>
-        </div>
-    </Dropdown>
-    <div class="serverfiles">
-
-        <RouterLink v-if="!['','/'].includes(path.toString())" :to="{
-            query: {
-                path: path.toString().split('/').slice(0, -1).join('/')
-            }
-        }" class="link"><span class="entry folder">../</span></RouterLink>
-        <div v-for="file in files">
-            <div v-if="file.folder">
-                <RouterLink :to="{
-                    query: {
-                        path: (path + '\/' + file.name).replaceAll('\/\/', '\/')
-                    }
-                }" class="link"><span class="entry folder" @contextmenu.prevent="e => {dropdownFile = file;dropdown.show(e)}">{{ file.name }}/</span></RouterLink>
-            </div>
-            <div v-else>
-                <RouterLink :to="{
-                    query: {
-                        path: (path + '\/' + file.name).replaceAll('\/\/', '\/'),
-                        type: 'read'
-                    }
-                }" class="link"><span class="entry file" @contextmenu.prevent="e => {dropdownFile = file;dropdown.show(e)}">{{ file.name }}</span></RouterLink>
+            }" class="link"><span class="entry folder">../</span></RouterLink>
+            <div v-for="file in files">
+                <div v-if="file.folder">
+                    <RouterLink :to="{
+                        query: {
+                            path: (path + '\/' + file.name).replaceAll('\/\/', '\/')
+                        }
+                    }" class="link"><span class="entry folder" @contextmenu.prevent="e => {dropdownFile = file;dropdown.show(e)}">{{ file.name }}/</span></RouterLink>
+                </div>
+                <div v-else>
+                    <RouterLink :to="{
+                        query: {
+                            path: (path + '\/' + file.name).replaceAll('\/\/', '\/'),
+                            type: 'read'
+                        }
+                    }" class="link"><span class="entry file" @contextmenu.prevent="e => {dropdownFile = file;dropdown.show(e)}">{{ file.name }}</span></RouterLink>
+                </div>
             </div>
         </div>
-    </div>
-    </div>
-    <div v-else>
-        <RouterLink :to="{
-            query: {
-                path: path.toString().split('/').slice(0, -1).join('/')
-            }
-        }"><button>Go back</button></RouterLink> <button @click="saveFile" v-if="hasServerPermission(user.user, server, 'serverfiles.write')">Save</button> <button @click="() => typeof path == 'string' ? downloadFile(path) : 0" v-if="hasServerPermission(user.user, server, 'serverfiles.download')">Download File</button> <br/>
-        <textarea v-model="fileData"></textarea>
+        </div>
+        <div v-else>
+            <RouterLink :to="{
+                query: {
+                    path: path.toString().split('/').slice(0, -1).join('/')
+                }
+            }"><button>Go back</button></RouterLink> <button @click="saveFile" v-if="hasServerPermission(user.user, server, 'serverfiles.write')">Save</button> <button @click="() => typeof path == 'string' ? downloadFile(path) : 0" v-if="hasServerPermission(user.user, server, 'serverfiles.download')">Download File</button> <br/>
+            <textarea v-model="fileData"></textarea>
+        </div>
     </div>
 </template>
 
 <style scoped>
+.files {
+    display: flex;
+    width: 100vw;
+    height: calc(100vh - 51px);
+    padding: 0px;
+}
 textarea {
     background-color: black;
     color: white;
@@ -476,7 +484,12 @@ textarea {
     text-decoration: none;
 }
 .serverfiles {
+    display: flex;
+    flex-direction: column;
     padding: 20px;
+    width: calc(100vw - 40px);
+    overflow-y: auto;
+    height: calc(100% - 51px - 50px);
 }
 #dropdown-inner button {
     border-radius: 0;

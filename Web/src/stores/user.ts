@@ -9,15 +9,26 @@ import { useServers } from "./servers";
 import { RequestResponses } from "@share/Requests";
 import { useWS } from "./ws";
 
+type Experiments = {
+    [key: string]: boolean
+}
+
 export const useUser = defineStore("user", () => {
     const user: Ref<User | undefined> = ref();
     const failedLogin: Ref<boolean> = ref(false);
+    let experiments: Experiments = JSON.parse(sessionStorage.getItem("experiments") || "{}");
     function logout() {
         if(user.value == undefined) throw new Error("already logged out");
         localStorage.removeItem("token");
         sendRequest("logout");
         user.value = undefined;
         event.emit("logout");
+    }
+    async function pullExperiments() {
+        return await sendRequest("experiment", { type: "list" });
+    }
+    function getExperiments() {
+        return experiments;
     }
     function hasPermission(permission: Permission) {
         return _hasPermission(user.value, permission);
@@ -30,6 +41,8 @@ export const useUser = defineStore("user", () => {
         if (testToken) {
             try {
                 await loginToken(testToken);
+                experiments = (await pullExperiments()).value as Experiments;
+                sessionStorage.setItem("experiments", JSON.stringify(experiments));
             } catch {
                 failedLogin.value = true;
                 localStorage.removeItem("token");
@@ -50,7 +63,7 @@ export const useUser = defineStore("user", () => {
         let resp = await sendRequest("auth", {username, password}, false);
         handleLoginPacket(resp);
     }
-    
+
     function handleLoginPacket(packet: RequestResponses["auth"]) {
         failedLogin.value = true;
         localStorage.setItem("token", packet.user.token);
@@ -64,5 +77,5 @@ export const useUser = defineStore("user", () => {
         }
         user.value = packet.user;
     }
-    return { user, logout, hasPermission, hasServerPermission, autoLogin, resetUser, loginToken, loginUsernamePass, failedLogin }
+    return { user, experiments, pullExperiments, getExperiments, logout, hasPermission, hasServerPermission, autoLogin, resetUser, loginToken, loginUsernamePass, failedLogin }
 });

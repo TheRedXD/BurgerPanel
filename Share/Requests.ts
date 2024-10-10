@@ -132,6 +132,17 @@ export type RequestResponses = {
     } | {
         type: "isInstalled",
         installed: boolean
+    },
+    experiment: {
+        type: "experiment",
+        name: string,
+        value: boolean
+    } | {
+        type: "experiment",
+        name: string,
+        value: {
+            [key: string]: boolean
+        }
     }
 }
 

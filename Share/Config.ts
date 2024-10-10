@@ -11,7 +11,8 @@ export let defaultConfig: Config = {
     logging_DiscordWebHookURL: "",
     logging_DisabledIDs: "packet.invalid-packet",
     logging_logDir: "",
-    bypassFileTypeLimitations: 0
+    bypassFileTypeLimitations: 0,
+    bypassServerPathEmptyCheck: 0,
 }
 export interface Config {
     defaultMemory: number;
@@ -25,6 +26,7 @@ export interface Config {
     logging_DiscordWebHookURL: string;
     logging_logDir: string;
     bypassFileTypeLimitations: number;
+    bypassServerPathEmptyCheck: number;
 }
 export let descriptions: { [key in keyof Config]?: string } = {
     defaultMemory: "The default amount of memory to allocate to a server",
@@ -34,7 +36,8 @@ export let descriptions: { [key in keyof Config]?: string } = {
     defaultMCSoftware: `The default Minecraft software to use when creating a server. Can be either ${allowedSoftwares.join(", ")}.`,
     stopServerTimeout: "The amount of time in milliseconds to wait for a server to stop before killing it.",
     defaultPermissions: "The permission to give a new user, separated by commas",
-    bypassFileTypeLimitations: "If enabled will allow all file types to be edited in the editor"
+    bypassFileTypeLimitations: "If enabled, will allow all file types to be edited in the editor",
+    bypassServerPathEmptyCheck: "If enabled, will allow the default server path to ignore being non-empty"
 }
 export let disabledEditingFrontend: string[] = ["logging_"]; // if it starts with this, it will be ignored on the frontend settings page
 // Array of keys that are allowed to be read by all users

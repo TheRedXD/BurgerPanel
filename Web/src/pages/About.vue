@@ -9,8 +9,8 @@
         <p>Burgerpanel is licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank">AGPLv3 License</a> on the <a href="https://github.com/TheBlueBurger/BurgerPanel" target="_blank">Github repository</a></p>
         <br/>
         <h3>Credits</h3>
-        <p>- <a href="https://github.com/TheBlueBurger" target="_blank">TheBlueBurger</a>: Most backend, most frontend, some CSS</p>
-        <p>- <a href="https://github.com/TheRedXD" target="_blank">_TheRedex</a>: Some css, notification system</p>
+        <p>- <a href="https://github.com/TheBlueBurger" target="_blank">TheBlueBurger</a>: Most backend, most frontend, styling</p>
+        <p>- <a href="https://github.com/TheRedXD" target="_blank">_TheRedex</a>: Styling, notification system, editor system</p>
         <p>- <a href="https://github.com/ArrayBuffer01" target="_blank">ArrayBuffer01</a>: Helping with backend and frontend</p>
         <br/>
         <h3>Build Info</h3>
@@ -24,6 +24,13 @@
 <style scoped>
     #main-about {
         margin: 20px 40px;
+        background-color: #1a1a1a;
+        border: 1px solid #282828;
+        padding: 20px;
+        border-radius: 5px;
+        -webkit-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+        -moz-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+        box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
     }
     h1 {
         font-size: 40px;

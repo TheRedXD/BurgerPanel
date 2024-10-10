@@ -15,6 +15,10 @@ export const useSettings = defineStore("settings", () => {
         settings.value[key] = request.value;
         return request.value as Config[T] extends number ? number : string;
     }
+    function getSettingFromCache<T extends keyof Config>(key: T): Config[T] extends number ? number : string {
+        let cachedValue = settings.value[key];
+        return cachedValue as Config[T] extends number ? number : string;
+    }
     async function setSetting(key: keyof Config, value: ConfigValue) {
         let resp = await sendRequest("setSetting", {key, value}, false)
         updateCachedValue(key, value);
@@ -30,5 +34,5 @@ export const useSettings = defineStore("settings", () => {
         allSettingsCached = true;
         return allSettings;
     }
-    return { settings, getSetting, setSetting, updateCachedValue, getAllSettings }
+    return { settings, getSetting, getSettingFromCache, setSetting, updateCachedValue, getAllSettings }
 });

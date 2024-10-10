@@ -18,36 +18,47 @@ let statusText = computed(() => {
 </script>
 
 <template>
-    <span class="container"><span :class="{
-        dot: true,
-        red: status == 'stopped' || status == 'stopping',
-        green: status == 'running',
-        gray: status == 'unknown'
-    }" /><pre> </pre><span class="text">{{ statusText }}</span></span>
+    <span class="container">
+        <span :class="{
+            dot: true,
+            red: status == 'stopped',
+            green: status == 'running',
+            yellow: (status as any == 'starting' || status == 'stopping'),
+            gray: status == 'unknown'
+        }">
+            <span class="text"><span class="point">{{ status == 'stopped' ? "×" : ( status == 'running' ? "•" : ( (status as any == 'starting' || status == 'stopping') ? "↻" : "·" ) ) }}</span>{{ statusText }}</span>
+        </span>
+    </span>
 </template>
 
 <style scoped>
 .dot {
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  display: inline-block;
+    border-radius: 6px;
+    display: inline-block;
+    padding: 2px 8px;
+    .text .point {
+        margin-right: 5px;
+    }
 }
 .green {
-    background-color: #0bbb31;
+    background-color: #23A24Ed0;
 }
 .red {
-    background-color: #c53d3d;
+    background-color: #CD4242d0;
+}
+.yellow {
+    background-color: #DE9D3Bd0;
 }
 .gray {
-    background-color: #504a4a;
+    background-color: #737373d0;
 }
 .text {
-  text-align: center;
-  vertical-align: middle;
+    text-align: center;
+    vertical-align: middle;
 }
 .container {
-  display: inline-flex;
-  align-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

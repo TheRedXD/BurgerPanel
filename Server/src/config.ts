@@ -50,8 +50,10 @@ let validators: { [key in keyof Config]?: (value: string) => Promise<boolean | s
         if (!(await (await fs.stat(newPath)).isDirectory())) {
             throw new Error("Server path is not a directory: " + newPath);
         }
-        if (await (await fs.readdir(newPath)).length != 0) {
-            throw new Error("Server path is not empty: " + newPath);
+        if(!await getSetting("bypassServerPathEmptyCheck")) {
+            if (await (await fs.readdir(newPath)).length != 0) {
+                throw new Error("Server path is not empty: " + newPath);
+            }
         }
         return path.normalize(newPath);
     },
@@ -93,6 +95,7 @@ let validators: { [key in keyof Config]?: (value: string) => Promise<boolean | s
         return valNum >= 0 && !isNaN(valNum)
     },
     bypassFileTypeLimitations: boolValidator,
+    bypassServerPathEmptyCheck: boolValidator
 }
 export function isValidKey(key: string | undefined): key is keyof Config {
     if(typeof key != "string") return false;

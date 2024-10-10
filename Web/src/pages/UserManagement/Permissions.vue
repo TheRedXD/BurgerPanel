@@ -42,38 +42,55 @@ if(!myUser.hasPermission("users.permissions.read")) {
 </script>
 
 <template>
-    <div v-if="user">
+    <div v-if="user" class="permissions">
         <h1>Manging user permissions of {{ user.username }}</h1>
         <br>
-        <table>
-            <tr>
-                <th>Permission</th>
-                <th>Enabled</th>
-                <th>Toggle</th>
-            </tr>
-            <tr v-for="perm of validPermissions" v-if="myUser.hasPermission('users.permissions.read')" :key="perm">
-                <td>
-                    {{  perm  }}
-                </td> 
-                <td :class="(user.permissions.includes(perm) ? 'green' : 'red')">
-                    {{  user.permissions.includes(perm) ? "Yes" : "No" }}
-                </td>
-                <td>
-                    <button v-if="myUser.hasPermission(perm) && myUser.hasPermission('users.permissions.write')" @click="togglePerm(perm)">Toggle</button>
-                </td>
-            </tr>
-        </table>
+        <div class="displayed">
+            <table>
+                <tr>
+                    <th>Permission</th>
+                    <th>Enabled</th>
+                    <th>Toggle</th>
+                </tr>
+                <tr v-for="perm of validPermissions" v-if="myUser.hasPermission('users.permissions.read')" :key="perm">
+                    <td>
+                        {{  perm  }}
+                    </td>
+                    <td :class="(user.permissions.includes(perm) ? 'green' : 'red')">
+                        {{  user.permissions.includes(perm) ? "Yes" : "No" }}
+                    </td>
+                    <td>
+                        <button v-if="myUser.hasPermission(perm) && myUser.hasPermission('users.permissions.write')" @click="togglePerm(perm)">Toggle</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-    <div v-else>
+    <div v-else class="permissions">
         Loading...
     </div>
 </template>
 <style scoped>
+h1 {
+    margin-top: 20px;
+}
+
+.permissions {
+    display: block;
+    height: calc(100vh - 51px - 20px);
+    width: calc(100vw - 40px);
+}
+
+.displayed {
+    height: calc(100% - 80px);
+    overflow-y: auto;
+}
+
 .red {
-    color: red;
+    color: #ff3c3c;
 }
 .green {
-    color: green;
+    color: #3cff6c;
 }
 
 table > tr > th {

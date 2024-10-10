@@ -39,8 +39,8 @@ async function changePassword(password: string) {
 </script>
 <template>
     <div class="container">
-        <h2>Welcome, {{ user.user?.username || "[unknown username]" }}!</h2>
-        <h3>User settings</h3>
+        <h1>Account Settings</h1>
+        <p>Welcome, {{ user.user?.username || "[unknown username]" }}!</p>
         <TextInput @set="setUsername" :default="user.user?.username || ''" placeholder="Username"></TextInput>
         <br/>
         <TextInput :default="''" :password="true" @set="changePassword" placeholder="Password"></TextInput>
@@ -50,6 +50,15 @@ async function changePassword(password: string) {
 </template>
 
 <style scoped>
+
+h1 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+p {
+    margin-bottom: 10px;
+}
 
 h3 {
     margin-bottom: 10px;
@@ -68,18 +77,16 @@ h2, h3, .btns {
 }
 
 .container {
-    width: max-content;
-    max-width: 600px;
-    margin: auto;
+    display: block;
+    margin: 20px;
     padding: 20px;
     border: 1px solid #333030;
     border-radius: 10px;
-    background-color: #201f1f;
-    /* vertical center */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* background-color: #201f1f; */
+    background-color: #1a1a1a;
+    -webkit-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+    -moz-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+    box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
 }
 
 br {
@@ -89,5 +96,11 @@ br {
 button {
     margin-top: 5px;
     margin-right: 5px;
+}
+</style>
+<style>
+input {
+    margin-bottom: 5px;
+    border-radius: 5px;
 }
 </style>

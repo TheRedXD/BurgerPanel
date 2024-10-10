@@ -193,154 +193,163 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <div v-if="user.hasPermission('settings.read')" class="settingsblock">
-        <h2>Settings</h2>
-        <div v-for="option of settingsAllowedToShow">
-            <span
-                class="setting-span"
-                :title="descriptions[option as keyof typeof defaultConfig]"
-                >{{ option }}</span
-            >
-            <TextInput
-                :default="
-                    (
-                        settings.settings[option as keyof Config] as ConfigValue
-                    ).toString()
-                "
-                @set="(v) => changeOption(option as keyof Config, v)"
-                v-if="
-                    typeof settings.settings[option as keyof Config] !=
-                    'undefined'
-                "
-            />
-        </div>
-    </div>
-    <div
-        v-if="user.hasPermission('settings.logging.set')"
-        class="loggingsettings"
-    >
-        <RouterLink
-            :to="{
-                name: 'logging',
-            }"
-            ><button>Logging Settings</button></RouterLink
-        >
-    </div>
-    <div class="usersthing">
-        <hr v-if="user.hasPermission('users.view')" />
-        <h3>Users</h3>
-        <div>
-            <button @click="creatingUser = !creatingUser">
-                {{ !creatingUser ? "Add user" : "Close" }}
-            </button>
-        </div>
-        <div v-if="creatingUser">
-            <form @submit.prevent="createUser()">
-                Username:
-                <input
-                    type="text"
-                    placeholder="Username"
-                    v-model="newUsername"
-                /><br />
-                <button type="submit">Create user</button>
-            </form>
-        </div>
-    </div>
-    <div id="users">
-        <div
-            v-for="_user in sortedUsers"
-            class="user"
-            @contextmenu.prevent="
-                (e) => dropdownRefs[_user._id].value[0].show(e)
-            "
-        >
-            <div class="user-content">
-                <h3>{{ _user.username }}</h3>
-                <p>ID: {{ _user._id }}</p>
-                <p>
-                    Created at: {{ new Date(_user.createdAt).toLocaleString() }}
-                </p>
-                <p v-if="_user.setupPending"><i>(Setup pending)</i></p>
-                <p v-if="clients.some((c) => c._id == _user._id)">
-                    Currently logged in!
-                </p>
-                <Dropdown
-                    :ref="getDropdownRefs(_user._id)"
-                    :create-on-cursor="true"
+    <div class="settings">
+        <div v-if="user.hasPermission('settings.read')" class="settingsblock">
+            <h2>Settings</h2>
+            <div v-for="option of settingsAllowedToShow">
+                <span
+                    class="setting-span"
+                    :title="descriptions[option as keyof typeof defaultConfig]"
+                    >{{ option }}</span
                 >
-                    <div id="dropdown-inner">
-                        <button
-                            @click="
-                                () => {
-                                    renameUser(_user._id);
-                                    dropdownRefs[_user._id].value[0].hide();
-                                }
-                            "
-                        >
-                            Rename
-                        </button>
-                        <br />
-                        <RouterLink
-                            :to="{
-                                name: 'editUserPermissions',
-                                params: {
-                                    user: _user._id,
-                                },
-                            }"
-                        >
-                            <button>Edit permissions</button>
-                        </RouterLink>
-                        <br />
-                        <button
-                            @click="
-                                () => {
-                                    viewToken(_user._id, true);
-                                    dropdownRefs[_user._id].value[0].hide();
-                                }
-                            "
-                        >
-                            Copy token
-                        </button>
-                        <br />
-                        <button
-                            @click="
-                                () => {
-                                    copyLoginURL(_user._id);
-                                    dropdownRefs[_user._id].value[0].hide();
-                                }
-                            "
-                        >
-                            Copy login URL
-                        </button>
-                        <br />
-                        <button
-                            @click="
-                                () => {
-                                    resetToken(_user._id);
-                                    dropdownRefs[_user._id].value[0].hide();
-                                }
-                            "
-                        >
-                            Reset token
-                        </button>
-                        <br />
-                        <button
-                            @click="
-                                () => {
-                                    deleteUser(_user);
-                                    dropdownRefs[_user._id].value[0].hide();
-                                }
-                            "
-                        >
-                            Delete account
-                        </button>
-                    </div>
-                </Dropdown>
+                <TextInput
+                    :default="
+                        (
+                            settings.settings[option as keyof Config] as ConfigValue
+                        ).toString()
+                    "
+                    @set="(v) => changeOption(option as keyof Config, v)"
+                    v-if="
+                        typeof settings.settings[option as keyof Config] !=
+                        'undefined'
+                    "
+                />
+            </div>
+        </div>
+        <div
+            v-if="user.hasPermission('settings.logging.set')"
+            class="loggingsettings"
+        >
+            <RouterLink
+                :to="{
+                    name: 'logging',
+                }"
+                ><button>Logging Settings</button></RouterLink
+            >
+        </div>
+        <div class="usersthing">
+            <hr v-if="user.hasPermission('users.view')" />
+            <h3>Users</h3>
+            <div>
+                <button @click="creatingUser = !creatingUser">
+                    {{ !creatingUser ? "Add user" : "Close" }}
+                </button>
+            </div>
+            <div v-if="creatingUser">
+                <form @submit.prevent="createUser()">
+                    Username:
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        v-model="newUsername"
+                    /><br />
+                    <button type="submit">Create user</button>
+                </form>
+            </div>
+        </div>
+        <div id="users">
+            <div
+                v-for="_user in sortedUsers"
+                class="user"
+                @contextmenu.prevent="
+                    (e) => dropdownRefs[_user._id].value[0].show(e)
+                "
+            >
+                <div class="user-content">
+                    <h3>{{ _user.username }}</h3>
+                    <p>ID: {{ _user._id }}</p>
+                    <p>
+                        Created at: {{ new Date(_user.createdAt).toLocaleString() }}
+                    </p>
+                    <p v-if="_user.setupPending"><i>(Setup pending)</i></p>
+                    <p v-if="clients.some((c) => c._id == _user._id)">
+                        Currently logged in!
+                    </p>
+                    <Dropdown
+                        :ref="getDropdownRefs(_user._id)"
+                        :create-on-cursor="true"
+                    >
+                        <div id="dropdown-inner">
+                            <button
+                                @click="
+                                    () => {
+                                        renameUser(_user._id);
+                                        dropdownRefs[_user._id].value[0].hide();
+                                    }
+                                "
+                            >
+                                Rename
+                            </button>
+                            <br />
+                            <RouterLink
+                                :to="{
+                                    name: 'editUserPermissions',
+                                    params: {
+                                        user: _user._id,
+                                    },
+                                }"
+                            >
+                                <button>Edit permissions</button>
+                            </RouterLink>
+                            <br />
+                            <button
+                                @click="
+                                    () => {
+                                        viewToken(_user._id, true);
+                                        dropdownRefs[_user._id].value[0].hide();
+                                    }
+                                "
+                            >
+                                Copy token
+                            </button>
+                            <br />
+                            <button
+                                @click="
+                                    () => {
+                                        copyLoginURL(_user._id);
+                                        dropdownRefs[_user._id].value[0].hide();
+                                    }
+                                "
+                            >
+                                Copy login URL
+                            </button>
+                            <br />
+                            <button
+                                @click="
+                                    () => {
+                                        resetToken(_user._id);
+                                        dropdownRefs[_user._id].value[0].hide();
+                                    }
+                                "
+                            >
+                                Reset token
+                            </button>
+                            <br />
+                            <button
+                                @click="
+                                    () => {
+                                        deleteUser(_user);
+                                        dropdownRefs[_user._id].value[0].hide();
+                                    }
+                                "
+                            >
+                                Delete account
+                            </button>
+                        </div>
+                    </Dropdown>
+                </div>
             </div>
         </div>
     </div>
 </template>
 <style scoped>
+.settings {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 51px - 40px);
+    margin: 20px;
+    overflow-y: auto;
+}
+
 .settingsblock {
     margin-left: 10px;
     margin-top: 10px;
@@ -401,5 +410,11 @@ onMounted(async () => {
 }
 h2 {
     margin-top: 10px;
+}
+hr {
+    margin: 10px 0px;
+    height: 1px;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
 }
 </style>
