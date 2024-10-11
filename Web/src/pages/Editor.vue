@@ -22,7 +22,7 @@ type PacketType = RequestResponses["systemInformation"]
 import { hasPermission} from '@share/Permission';
 import sendRequest from '../util/request';
 import * as chartjs from "chart.js";
-let intervalID = -1;
+let intervalID: any = -1;
 onUnmounted(() => {
     clearInterval(intervalID);
 });
@@ -67,6 +67,7 @@ const chartData: chartDataType = {
 const chartOptions = {
     responsive: true,
     animation: false,
+    font: "Ubuntu Mono Regular",
     // animation: {
     //     duration: 2000,
     //     easing: 'linear'
@@ -94,30 +95,15 @@ const updateChart = () => {
         chart.update();
     }
 };
-onMounted(() => {
-    const ctx = document.getElementById('loadChart') as HTMLCanvasElement;
-    chart = new chartjs.Chart(ctx, {
-        type: 'line',
-        data: chartData as any,
-        options: chartOptions as any
-    });
-    if (ctx) {
-        let context = ctx.getContext("2d") as CanvasRenderingContext2D;
-        context.font = '16px Arial';
-        context.fillStyle = '#888888';
-        context.textAlign = 'right';
-        context.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        context.fillRect(ctx.width - 60, 10, 45, 30);
-        context.fillStyle = '#888888';
-        context.fillText('Load', ctx.width - 20, 30);
-    }
-    intervalID = setInterval(async () => {
-        if(!user.hasPermission("performance.view")) {
-            info.value = null;
-            return;
-        }
-        await getAndSetInfo();
-        updateChart();
+function mountCall() {
+    // FIXME: THIS IS A MASSIVE HACK, FIX THIS LATER
+    setTimeout(() => {
+        const ctx = document.getElementById('loadChart') as HTMLCanvasElement;
+        chart = new chartjs.Chart(ctx, {
+            type: 'line',
+            data: chartData as any,
+            options: chartOptions as any
+        });
         if (ctx) {
             let context = ctx.getContext("2d") as CanvasRenderingContext2D;
             context.font = '16px Arial';
@@ -128,7 +114,31 @@ onMounted(() => {
             context.fillStyle = '#888888';
             context.fillText('Load', ctx.width - 20, 30);
         }
-    }, 1000);
+        intervalID = setInterval(async () => {
+            if (!user.hasPermission("performance.view")) {
+                info.value = null;
+                return;
+            }
+            await getAndSetInfo();
+            updateChart();
+            if (ctx) {
+                let context = ctx.getContext("2d") as CanvasRenderingContext2D;
+                context.font = '16px Arial';
+                context.fillStyle = '#888888';
+                context.textAlign = 'right';
+                context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                context.fillRect(ctx.width - 60, 10, 45, 30);
+                context.fillStyle = '#888888';
+                context.fillText('Load', ctx.width - 20, 30);
+            }
+        }, 1000);
+    }, 10);
+}
+function unmountCall() {
+    clearInterval(intervalID);
+}
+onMounted(() => {
+    mountCall();
 });
 </script>
 
@@ -137,10 +147,10 @@ onMounted(() => {
         <div class="editor-content">
             <div class="editor-sidebar">
             <p class="label">Utilities</p>
-            <div :class="'server' + (selected == 'dashboard' ? ' selected' : '')" @click="select('dashboard')"><div class="server-text"><IconVue name="dashboard" class="icon"/><span>Dashboard</span></div></div>
+            <div :class="'server' + (selected == 'dashboard' ? ' selected' : '')" @click="select('dashboard');unmountCall();mountCall();"><div class="server-text"><IconVue name="dashboard" class="icon"/><span>Dashboard</span></div></div>
             <p class="label">Servers</p>
             <p v-if="servers.servers.length == 0" class="not-found">No servers found!</p>
-                <div v-for="server of servers.servers" :class="'server' + (selected == ('server-'+server.name) ? ' selected' : '')" @click="select('server-'+server.name)"><div class="server-text"><IconVue name="server" class="icon"/><span>{{ server.name }}</span></div></div>
+                <div v-for="server of servers.servers" :class="'server' + (selected == ('server-'+server.name) ? ' selected' : '')" @click="select('server-'+server.name);unmountCall();mountCall();"><div class="server-text"><IconVue name="server" class="icon"/><span>{{ server.name }}</span></div></div>
             </div>
             <div class="editor-view">
                 <div class="warn"><IconVue name="warning" class="icon"/>This is EXTREMELY experimental. Expect bugs.</div>
@@ -235,6 +245,51 @@ onMounted(() => {
 .editor-page {
     display: flex;
 }
+
+.editor-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    height: 100%;
+    width: 100%;
+}
+
+.editor-page-dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: left;
+    width: 100%;
+    height: calc(100% - 80px);
+    margin: 20px;
+    padding: 20px;
+    background-color: #181818;
+    border-radius: 5px;
+    border: 1px solid #222222;
+    h1 {
+        font-weight: 400;
+        font-size: 24px;
+    }
+    h2 {
+        font-weight: 400;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    .infos {
+        display: flex;
+        flex-direction: row;
+        align-items: left;
+        justify-content: left;
+    }
+    .system-info {
+        margin: 10px 0px;
+        border: 1px solid #333333;
+        padding: 5px 10px;
+        width: fit-content;
+    }
+}
+
 div.server {
     display: flex;
     flex-direction: row;
@@ -283,51 +338,6 @@ div.server {
     margin-top: 10px;
     margin-bottom: 5px;
 }
-
-.editor-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    vertical-align: middle;
-    height: 100%;
-    width: 100%;
-}
-
-.editor-page-dashboard {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    justify-content: left;
-    width: 100%;
-    height: calc(100% - 80px);
-    margin: 20px;
-    padding: 20px;
-    background-color: #181818;
-    border-radius: 5px;
-    border: 1px solid #222222;
-    h1 {
-        font-weight: 400;
-        font-size: 24px;
-    }
-    h2 {
-        font-weight: 400;
-        font-size: 20px;
-        margin-bottom: 10px;
-    }
-    .infos {
-        display: flex;
-        flex-direction: row;
-        align-items: left;
-        justify-content: left;
-    }
-    .system-info {
-        margin: 10px 0px;
-        border: 1px solid #333333;
-        padding: 5px 10px;
-        width: fit-content;
-    }
-}
-
 </style>
 
 <style lang="scss">

@@ -3,6 +3,7 @@ import { ComputedRef, Ref, computed, onMounted, onUnmounted, ref, watch } from '
 import event from '../util/event';
 import { ConfirmButtonType, ModalData } from '../util/modal';
 import TextInput from './TextInput.vue';
+import * as xss from "xss";
 
 let props = defineProps({
     modalID: {
@@ -124,8 +125,36 @@ function onBlurClick(e: MouseEvent) {
     let composedPath = e.composedPath();
     let found = composedPath.some((el) => {
         return el == containerRef.value
-    });
+    });0
     if(!found) closeModal();
+}
+function parseDescription(text: string) {
+    let sanitized = xss.default(text, {
+        //@ts-ignore
+        allowList: []
+    });
+    // Parse code (implement the other formatting later)
+    let code_regex = /(?<code>(?<!\\)(?:\\\\)*`.*?(?<!\\)(?:\\\\)*`)/gm;
+    // let italic_regex = /(?<italic>(?<!\\)(?:\\\\)*(\*|_)(.*?)(?<!\\)(?:\\\\)*\2)/gm;
+    // let bold_regex = /(?<bold>(?<!\\)(?:\\\\)*\*\*(.*?)(?<!\\)(?:\\\\)*\*\*)/gm;
+    // let underline_regex = /(?<underline>(?<!\\)(?:\\\\)*__(.*?)(?<!\\)(?:\\\\)*__)/gm;
+    let matches = sanitized.matchAll(code_regex);
+    matches.forEach(match => {
+        if (match.groups) sanitized = sanitized.replace(match.groups.code, "<code>"+match.groups.code.substring(1, match.groups.code.length-1)+"</code>")
+    });
+    // matches = sanitized.matchAll(italic_regex);
+    // matches.forEach(match => {
+    //     if (match.groups) sanitized = sanitized.replace(match.groups.italic, "<i>"+match.groups.italic.substring(1, match.groups.italic.length-1)+"</i>")
+    // });
+    // matches = sanitized.matchAll(bold_regex);
+    // matches.forEach(match => {
+    //     if (match.groups) sanitized = sanitized.replace(match.groups.bold, "<b>"+match.groups.bold.substring(1, match.groups.bold.length-1)+"</b>")
+    // });
+    // matches = sanitized.matchAll(underline_regex);
+    // matches.forEach(match => {
+    //     if (match.groups) sanitized = sanitized.replace(match.groups.underline, "<u>"+match.groups.underline.substring(1, match.groups.underline.length-1)+"</u>")
+    // });
+    return sanitized;
 }
 </script>
 
@@ -147,7 +176,7 @@ function onBlurClick(e: MouseEvent) {
                         </div>
                         <div v-else>
                             <h1>{{ defaultModalData?.title }}</h1>
-                            <pre v-if="defaultModalData?.description">{{ defaultModalData?.description }}</pre>
+                            <pre v-if="defaultModalData?.description" v-html="parseDescription(defaultModalData?.description)"></pre>
                             <div v-if="__isDefaultModal">
                                 <div v-if="defaultModalData?.inputs" v-for="input in defaultModalData?.inputs">
                                     <div v-if="input.type == 'TextInput'">
@@ -201,10 +230,7 @@ function onBlurClick(e: MouseEvent) {
     </div>
 </template>
 
-<style scoped>
-#done-btn {
-    margin-top: 5px;
-}
+<style scoped lang="scss">
 @keyframes fade {
     0% {
         background-color: rgba(0, 0, 0, 0);
@@ -228,6 +254,14 @@ function onBlurClick(e: MouseEvent) {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+#done-btn {
+    margin-top: 5px;
+}
+
+h1 {
+    max-width: calc(100% - 30px);
 }
 
 #blur {
@@ -314,19 +348,39 @@ function onBlurClick(e: MouseEvent) {
 }
 
 .bg-red {
-    background-color: #DD5656;
+    background-color: #DD5656a0;
+    color: #ffcfcf;
+    border-color: #ff9496;
+    &:hover {
+        background-color: #DD5656f0;
+        color: white;
+    }
 }
 
 .bg-green {
-    background-color: #59ad60;
+    background-color: #59ad60a0;
+    color: #83ff8d;
+    border-color: #83ff8d;
+    &:hover {
+        background-color: #59ad60f0;
+        color: white;
+    }
 }
 
 .bg-gray {
     background-color: #2c2b2b;
+    border-color: #4c4b4b;
+    &:hover {
+        background-color: #4c4b4b;
+        border-color: #8c8b8b;
+        color: white;
+    }
 }
 
 button {
-    color: black;
+    color: white;
+    padding: 5px 10px;
+    margin: 2px;
     display: unset !important;
 }
 
@@ -335,5 +389,17 @@ button {
 }
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+</style>
+
+<style>
+code {
+    background-color: #383838;
+    padding: 0px 5px;
+    border-radius: 5px;
+    color: #cccccc;
+}
+u {
+    text-decoration: underline;
 }
 </style>

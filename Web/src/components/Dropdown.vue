@@ -3,7 +3,7 @@ import { onUnmounted, ref } from 'vue';
 let visible = ref(false);
 let currentX = ref(0);
 let currentY = ref(0);
-let checkElementInterval = -1;
+let checkElementInterval: any = -1;
 onUnmounted(() => {
     clearInterval(checkElementInterval);
 })
@@ -36,8 +36,8 @@ function show(e: MouseEvent) {
         //     clientY = clientY - cornerY + screenY;
         // }
         if(import.meta.env.DEV) console.log(`Math.min(${screenX}-${items.value?.clientWidth} -> ${screenX-items.value?.clientWidth}, ${clientX}) -> ${Math.min(screenX-items.value?.clientWidth, clientX)}`)
-        clientX = Math.min(screenX-items.value?.clientWidth, clientX);
-        clientY = Math.min(screenY-items.value?.clientHeight, clientY);
+        clientX = Math.min(screenX-items.value?.clientWidth - 15, clientX);
+        clientY = Math.min(screenY-items.value?.clientHeight - 15, clientY);
         currentX.value = clientX;
         currentY.value = clientY;
     })
@@ -91,6 +91,35 @@ let items = ref(null as HTMLDivElement | null);
 #dropdown-items {
     position: fixed;
     background-color: rgb(51, 51, 51);
-    border-radius: 3px;
+    border: 1px solid #5c5c5c;
+    border-radius: 5px;
+    -webkit-box-shadow: 0px 2px 20px 0px rgba(0,0,0,0.35);
+    -moz-box-shadow: 0px 2px 20px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 2px 20px 0px rgba(0,0,0,0.35);
+}
+</style>
+<style>
+#dropdown-items button {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin: 0;
+    border: none;
+    border-top: 1px solid #5c5c5c;
+    font-size: 14px;
+    color: #aaaaaa;
+}
+
+#dropdown-items button:hover {
+    color: #ffffff;
+}
+
+#dropdown-items button:first-of-type {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border: none;
+}
+#dropdown-items button:last-of-type {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 </style>

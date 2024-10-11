@@ -56,19 +56,21 @@
         }" :type="props.password ? 'password' : 'text'" @input="e => {if(modalMode) $emit('set', text)}" :class="{
             'modal-mode': modalMode
         }" :maxlength="props.maxLength">
-    <button v-if="disabled && !modalMode" @click="() => {if(!props.forceDisabled) disabled = false}" :style="
-    {
-        cursor: props.forceDisabled ? 'not-allowed' : 'pointer'
-    }
-    " id="edit-btn">Edit</button>
-    <button v-if="!disabled && !modalMode" @click="set" id="set-btn">Set</button>
-    <button v-if="!disabled && !modalMode" @click="reset" id="cancel-btn">Cancel</button>
-</span>
+        <button v-if="disabled && !modalMode" @click="() => {if(!props.forceDisabled) disabled = false}" :style="
+        {
+            cursor: props.forceDisabled ? 'not-allowed' : 'pointer'
+        }
+        " id="edit-btn">Edit</button>
+        <button v-if="!disabled && !modalMode" @click="set" id="set-btn">Set</button>
+        <button v-if="!disabled && !modalMode" @click="reset" id="cancel-btn">Cancel</button>
+    </span>
 </template>
 <style scoped>
 input {
+    display: inline-block;
     overflow-x: scroll;
     scrollbar-width: unset;
+    margin-right: 0!important;
 }
 input::-webkit-scrollbar {
     width: unset;
@@ -80,12 +82,14 @@ input::-webkit-scrollbar {
     border-right: 1px solid #504f4f;
 }
 #edit-btn {
+    display: inline-block;
     background-color: #2c2b2b80;
     border: 1px solid #323131;
     color: #868686;
     border-radius: 0px 10px 10px 0px;
     padding:5px 10px;
     border-left: none;
+    margin-left: 0!important;
 }
 #edit-btn:hover {
     background-color: #515050;
@@ -94,15 +98,20 @@ input::-webkit-scrollbar {
     color: #d0d0d0;
 }
 #set-btn {
+    display: inline-block;
     border-radius: 0px;
     padding:5px 10px;
     border-left:none;
     border-right:none;
+    margin-left: 0!important;
+    margin-right: 0!important;
 }
 #cancel-btn {
+    display: inline-block;
     padding: 5px 10px;
     border-radius: 0px 10px 10px 0px;
     border-left: none;
+    margin-left: 0!important;
 }
 /* the button for applying will only show once */
 input {

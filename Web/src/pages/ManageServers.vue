@@ -111,7 +111,7 @@ let newMCServerPort = ref(25565);
             <ServerVue v-for="server of usedServers" :server="server" />
         </div>
         <p v-if="usedServers.length === 0">
-        <template v-if="!loading">There are no servers for you to manage.{{ (!(router.currentRoute.value.query.all == 'true') && user.hasPermission('servers.all.view')) ? " You can click 'Show all servers' to see all servers on the server." : '' }}</template>
+        <template v-if="!loading"><p class="no-server-manage">There are no servers for you to manage.{{ (!(router.currentRoute.value.query.all == 'true') && user.hasPermission('servers.all.view')) ? " You can click 'Show all servers' to see all servers manageable by the panel." : '' }}</p></template>
         <template v-else>Loading servers...</template>
         </p>
     </div>
@@ -141,5 +141,9 @@ button {
     flex-wrap:wrap;
     justify-content: center;
     margin-top: 10px;
+}
+
+.no-server-manage {
+    margin-left: 20px;
 }
 </style>

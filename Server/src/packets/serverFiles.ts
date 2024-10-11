@@ -2,11 +2,16 @@ import { OurClient, Packet, ServerPacketResponse, requestDownload, requestUpload
 import { servers, users } from "../db.js";
 import { hasServerPermission } from "../util/permission.js";
 import fs from "node:fs/promises";
+import { createWriteStream, createReadStream } from "node:fs";
 import path from "node:path";
 import mime from "mime-types";
+import tar from "tar-fs";
+import gunzip from "gunzip-maybe";
+import zlib from "node:zlib";
 import { allowedFileNames, allowedMimeTypes } from "../../../Share/Server.js";
 import { Request } from "../../../Share/Requests.js";
 import logger, { LogLevel } from "../logger.js";
+import todo from "../util/todo.js";
 import { getSetting } from "../config.js";
 
 export default class ServerFiles extends Packet {
@@ -95,13 +100,8 @@ export default class ServerFiles extends Packet {
                 }
             case "upload":
                 if(!hasServerPermission(client.data.auth.user, server.toJSON(), "serverfiles.upload")) return "no permission to upload";
-                let [id, promise] = await requestUpload();
+                let id = requestUpload(pathToCheck);
                 logger.log(`${client.data.auth.user?.username} is uploading ${data.path} to ${server.name} with upload ID '${id}'`, "server.file.upload");
-                if(!(promise instanceof Promise)) return;
-                if(typeof id != "string") return;
-                promise.then(async buf => {
-                    await fs.writeFile(pathToCheck, buf);
-                });
                 return {
                     type: "uploadConfirm",
                     id
@@ -140,6 +140,63 @@ export default class ServerFiles extends Packet {
                     return `Failed to move: ${err}`
                 }
                 return {type: "moveSuccess"}
+            case "archive":
+                if (!hasServerPermission(client.data.auth.user, server.toJSON(), "serverfiles.archive")) return "No permission to create archives!";
+                if (typeof data.path != "string") return "Path not provided or invalid";
+                if (typeof data.folder_name != "string") return "Folder name not provided or invalid";
+                if (typeof data.file_name != "string") return "File name not provided or invalid";
+                if (typeof data.download != "boolean") data.download = false;
+                return await new Promise((res) => {
+                    try {
+                        if (data.download) {
+                            // TODO: Implement instant download without writing to FS
+                            res(todo(`Instant download is not implemented for packet ${this.name}!`));
+                        } else {
+                            let folderPath = path.join(server.path, data.path, data.folder_name);
+                            let createToPath = path.join(server.path, data.path, data.file_name);
+                            let pack = tar.pack(folderPath);
+                            let gzip_stream = zlib.createGzip();
+                            let wstr = createWriteStream(createToPath);
+                            pack.pipe(gzip_stream).pipe(wstr);
+                            wstr.on("finish", () => {
+                                logger.log(`${client.data.auth.user?.username} created archive ${data.file_name} from ${data.folder_name} in ${server.name}`, "server.file.archive");
+                                res({ type: "archiveSuccess" });
+                            });
+                        }
+                    } catch (err) {
+                        res(`Failed to archive: ${err}`);
+                    }
+                });
+                break;
+            case "extract":
+                if (!hasServerPermission(client.data.auth.user, server.toJSON(), "serverfiles.extract")) return "No permission to extract archives!";
+                if (typeof data.path != "string") return "Path not provided or invalid";
+                if (typeof data.file_name != "string") return "File name not provided or invalid";
+                return await new Promise((res) => {
+                    try {
+                        let filePath = path.join(server.path, data.path, data.file_name);
+                        if (data.file_name.endsWith(".tar.gz")) {
+                            let extractPath = path.join(server.path, data.path);
+                            let rstr = createReadStream(filePath);
+                            let xtr = tar.extract(extractPath);
+                            let gun = gunzip();
+                            rstr.pipe(gun).pipe(xtr);
+                            logger.log(`${client.data.auth.user?.username} is extracting archive ${data.file_name} to ${data.path} in ${server.name}`, "server.file.extract");
+                            gun.on("finish", () => {
+                                logger.log(`${client.data.auth.user?.username} extracted archive ${data.file_name} to ${data.path} in ${server.name}`, "server.file.extract");
+                                res({ type: "extractSuccess" });
+                            });
+                        } else if (filePath.endsWith(".zip")) {
+                            // TODO: Implement unzipping
+                            res(todo(`Unzipping is not implemented for packet ${this.name}!`));
+                        } else {
+                            res(`Unsupported file type of file ${data.file_name}`);
+                        }
+                    } catch (err) {
+                        res(`Failed to extract: ${err}`);
+                    }
+                });
+                break;
         }
     }
 }

@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { Ref, ref, watch } from 'vue';
 import { useServers } from '@stores/servers';
@@ -11,7 +10,7 @@ import dompurify from "dompurify"
 import { parse as markedParse } from 'marked';
 import titleManager from '@util/titleManager';
 function parseMDSecurely(dirtyText: string) {
-    return dompurify.sanitize(markedParse(dirtyText));
+    return dompurify.sanitize(markedParse(dirtyText) as string);
 }
 let props = defineProps({
     server: {

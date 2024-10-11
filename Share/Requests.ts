@@ -89,6 +89,10 @@ export type RequestResponses = {
         id: string
     } | {
         type: "moveSuccess"
+    } | {
+        type: "archiveSuccess"
+    } | {
+        type: "extractSuccess"
     },
     serverLogs: {
         files: string[],
