@@ -223,6 +223,7 @@
         uploaded.value.forEach(a => totalUploadFinished += a);
         return totalUploadFinished ?? 0
     })
+    let modalFileChooser: Ref<HTMLInputElement | undefined> = ref();
     function handleFileUpload(fsEntry: FileSystemEntry, filePath: string) {
         (fsEntry as FileSystemFileEntry).file((f) => {
             toUpload.value.push({
@@ -242,14 +243,21 @@
         });
         console.log("to create", directoriesToCreate.value);
     }
-    function addFiles(f: DataTransfer) {
+    function addFiles(f: DataTransfer | FileList | null | undefined) {
         if(!f) return;
-        Array.from(f.items).forEach(item => {
-            let fileSystemEntry = item.webkitGetAsEntry();
-            if(!fileSystemEntry) return console.log("cant get as webkit entry for some reason");
-            if(fileSystemEntry.isDirectory) handleFolderUpload(fileSystemEntry);
-            else handleFileUpload(fileSystemEntry, "/");
-        })
+        if(f instanceof DataTransfer) {
+            Array.from(f.items).forEach(item => {
+                let fileSystemEntry = item.webkitGetAsEntry();
+                if(!fileSystemEntry) return console.log("cant get as webkit entry for some reason");
+                if(fileSystemEntry.isDirectory) handleFolderUpload(fileSystemEntry);
+                else handleFileUpload(fileSystemEntry, "/");
+            })
+        } else {
+            Array.from(f as FileList).forEach(f => toUpload.value.push({
+                path: "/",
+                file: f
+            }));
+        }
     }
     let totalSize: Ref<number | undefined> = ref();
     function onDropAnywhere(e: DragEvent) {
@@ -410,7 +418,12 @@
         </Modal>
         <Modal v-if="showUploadModal" :button-type="''" @close-btn-clicked="closeModal">
             <div v-if="!uploading">
-                <p style="margin: 10px">Drag and drop files/folders to upload them</p>
+                <p style="margin: 20px" class="clickable-dragger" @click="modalFileChooser?.click()">
+                    Drag and drop files/folders to upload them, or click this to upload files.
+                    <input type="file" style="visibility:hidden;position:absolute;" ref="modalFileChooser" multiple @change.prevent="e => {
+                        addFiles((e.target as HTMLInputElement).files);
+                    }">
+                </p>
                 <div v-if="toUpload.length != 0 || directoriesToCreate.length != 0">
                     <div v-for="directory of directoriesToCreate" class="file-item">
                         {{ directory }} (Folder) <button @click="directoriesToCreate = directoriesToCreate.filter(a => a != directory)">Delete</button>
@@ -569,6 +582,16 @@ textarea {
 #dropdown-inner button {
     border-radius: 0;
     width:100%;
+}
+
+.clickable-dragger {
+    cursor: pointer;
+    padding: 30px 15px;
+    border-radius: 5px;
+    transition: all .05s ease-in-out;
+    &:hover {
+        background-color: #444444;
+    }
 }
 
 .entry {

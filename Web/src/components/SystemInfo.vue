@@ -7,7 +7,7 @@ import { useUser } from '../stores/user';
 import sendRequest from '../util/request';
 import * as chartjs from "chart.js";
 let user = useUser();
-let intervalID = -1;
+let intervalID: any = -1;
 onUnmounted(() => {
     clearInterval(intervalID);
 });

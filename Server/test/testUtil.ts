@@ -31,7 +31,7 @@ export default new class TestUtil {
     }
     async start() {
         try {
-            fs.rmdirSync(path.join(__dirname, "..", "test-context", this.port.toString()));
+            fs.rmSync(path.join(__dirname, "..", "test-context", this.port.toString()), {recursive: true});
         } catch {}
         try {
             fs.mkdirSync(path.join(__dirname, "..", "test-context"));

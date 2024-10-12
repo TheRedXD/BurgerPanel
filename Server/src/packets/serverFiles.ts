@@ -88,7 +88,7 @@ export default class ServerFiles extends Packet {
                 if (deleteFileStat.isDirectory()) {
                     if ((await fs.readdir(pathToCheck)).length != 0 && !hasServerPermission(client.data.auth.user, server.toJSON(), "serverfiles.recursivedeletion")) return "No permission to delete a non-empty directory";
                     logger.log(`${client.data.auth.user?.username} is deleting directory ${data.path} in ${server.name}`, 'server.file.delete');
-                    await fs.rmdir(pathToCheck, {recursive: true});
+                    await fs.rm(pathToCheck, {recursive: true});
                     return {
                         type: "delete-success"
                     }
