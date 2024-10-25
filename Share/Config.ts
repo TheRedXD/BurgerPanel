@@ -4,7 +4,7 @@ export let defaultConfig: Config = {
     defaultMemory: 1024,
     webServerPort: 3001,
     serverPath: "",
-    defaultMCVersion: "1.20.1",
+    defaultMCVersion: "1.21.3",
     defaultMCSoftware: "paper",
     stopServerTimeout: 120_000, // 2 mins
     defaultPermissions: "performance.view,performance.mem,performance.load,performance.platform", // thats how the database works and im too lazy to change

@@ -25,7 +25,7 @@ export async function search(query: string, version: string, software: AllowedSo
     facets: JSON.stringify([
       ["versions:" + version],
       ["server_side:required","server_side:optional"],
-      software != "fabric" ? bukkitTypes.map((a) => "categories:" + a): ["categories:fabric"],
+      software != "fabric" && software != "quilt" ? bukkitTypes.map((a) => "categories:" + a): (software == "fabric" ? ["categories:fabric"] : ["categories:quilt"]),
     ]),
   });
   return await sendModrinthRequest("/search?" + encodedQS);

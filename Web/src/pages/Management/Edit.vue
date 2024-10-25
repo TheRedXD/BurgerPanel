@@ -14,6 +14,13 @@ import Modal from '@components/Modal.vue';
 import { useUser } from '@stores/user';
 import { useServers } from '@stores/servers';
 import { useUsers } from '@stores/users';
+
+let moddedServerSoftwares = ["fabric", "quilt", "forge"];
+
+function isModded(software: string) {
+    return moddedServerSoftwares.includes(software);
+}
+
 let server = ref<Server | null>(null);
 let props = defineProps<{
   server: string;
@@ -197,7 +204,7 @@ async function changeUseJVMArgs() {
             server: props.server
         }
     }" v-if="hasServerPermission(user.user, server, 'plugins.download')">
-        <button>Download {{server.software == "fabric" ? "mods" : "plugins"}}</button>
+        <button>Download {{isModded(server.software) ? "mods" : "plugins"}}</button>
     </RouterLink>
     <RouterLink :to="{
         name: 'integrator',

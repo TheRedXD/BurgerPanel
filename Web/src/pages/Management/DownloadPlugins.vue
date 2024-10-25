@@ -9,6 +9,13 @@ import { showInfoBox } from '@util/modal';
 import dompurify from "dompurify"
 import { parse as markedParse } from 'marked';
 import titleManager from '@util/titleManager';
+
+let moddedServerSoftwares = ["fabric", "quilt", "forge"];
+
+function isModded(software: string) {
+    return moddedServerSoftwares.includes(software);
+}
+
 function parseMDSecurely(dirtyText: string) {
     return dompurify.sanitize(markedParse(dirtyText) as string);
 }
@@ -77,16 +84,16 @@ async function downloadPlugin(version: MRVersion, hash: string, pluginName: stri
         server: props.server,
         hash
     });
-    showInfoBox("Install success!", `The ${server.value.software == "fabric" ? "mod" : "plugin"} ${pluginName} with version ${version.name} (${filename}) has been successfully installed to ${server.value.name}\nYou may need a server restart for the ${server.value.software == "fabric" ? "mod" : "plugin"} to be loaded.`)
+    showInfoBox("Install success!", `The ${isModded(server.value.software) ? "mod" : "plugin"} ${pluginName} with version ${version.name} (${filename}) has been successfully installed to ${server.value.name}\nYou may need a server restart for the ${isModded(server.value.software) ? "mod" : "plugin"} to be loaded.`)
 }
 </script>
 
 <template>
     <div class="downloader">
         <div id="head">
-            <h1>{{server.software == "fabric" ? "Mod" : "Plugin"}} downloader for: <span>{{ server.name }}</span></h1>
+            <h1>{{isModded(server.software) ? "Mod" : "Plugin"}} downloader for: <span>{{ server.name }}</span></h1>
             <form @submit.prevent="search">
-                <TextInput default="" :modal-mode="true" :initial-editing="true" @set="q => query = q" :placeholder="'Search for ' + (server.software == 'fabric' ? 'mods' : 'plugins') + '...'" />
+                <TextInput default="" :modal-mode="true" :initial-editing="true" @set="q => query = q" :placeholder="'Search for ' + (isModded(server.software) ? 'mods' : 'plugins') + '...'" />
             </form>
             <RouterLink :to="{
                 name: 'editServer',

@@ -27,6 +27,57 @@ export default new class ServerManager {
     constructor() {
 
     }
+    async ultraSpecialAndIncrediblyStupidHandlerForQuilt(serverVersion: string, installerVersion: string, loaderVersion: string, path: string) {
+        // I'll go out here and say: SCREW YOU, QUILT
+        // This should NEVER be needed in any scenario, ever
+        // you only made modding more difficult and you
+        // fragmented the modding community.
+        // Your damn docs have been "work-in-progress"
+        // for YEARS without any significant activity or change.
+        // Not only that, you go out of your way to say
+        // that quilt is going to be "better" than fabric,
+        // yet you can't even get a basic jar downloading route
+        // correct, meaning this stupid function has to exist.
+        //
+        // - TheRed, one of the unbelievably cursed maintainers of BurgerPanel.
+        //
+        // PS: I hope quilt either actually becomes good,
+        // or dies out, for good. Don't make a revolution,
+        // make an evolution. Improve the modding scene
+        // as is, if it's not fundamentally flawed, and
+        // fabric literally already fixed it back in 2018.
+        //
+        // And not to mention, you can contribute to fabric.
+
+        return new Promise((res, rej) => {
+            // Verify variables to ensure no one's trying to nuke this, I ain't trusting quilt (and neither should you)
+            let validationRegex = /^(\d+\.\d+\.\d+(?:-[a-z]+(?:\.\d+)?)?)$/g
+
+            let ivm = installerVersion.match(validationRegex);
+            let lvm = loaderVersion.match(validationRegex);
+
+            if (ivm !== null && ivm[0] == installerVersion && lvm !== null && lvm[0] == loaderVersion) {
+                let stupid = spawn("java", [
+                    "-jar", `${path}/quilt-installer-${installerVersion}.jar`,
+                    "install", "server", serverVersion, loaderVersion,
+                    "--download-server", `--install-dir="${path.replaceAll('"', '\\"').replaceAll('\\', '\\\\')}"`
+                ]);
+
+                stupid.on('close', async (code) => {
+                    // Delete garbage files it created
+                    await fs.rm(`${path}/quilt-server-launch.jar`, { force: true });
+                    await fs.rm(`${path}/quilt-installer-${installerVersion}.jar`, { force: true });
+                    if (code != 0 && code !== null) {
+                        res(false);
+                    }
+                });
+
+                res(true);
+            } else {
+                res(false);
+            }
+        });
+    }
     async setupServer(server: Server) {
         this.createEntryIfNeeded(server);
         let path = server.path;
@@ -37,6 +88,7 @@ export default new class ServerManager {
         if (items.includes("server.jar")) return;
         // Download the server jar
         let downloadURL: string = "";
+        let softwareIsStupid = false;
         switch (server.software) {
             case "paper":
                 let paperAPIResp = await (await fetch(`https://api.papermc.io/v2/projects/paper/versions/${server.version}/builds/`)).json();
@@ -62,13 +114,27 @@ export default new class ServerManager {
                 let fabricInstallerVersions = await (await fetch("https://meta.fabricmc.net/v2/versions/installer")).json();
                 downloadURL = `https://meta.fabricmc.net/v2/versions/loader/${server.version}/${fabricLoaderVersions[0].version}/${fabricInstallerVersions[0].version}/server/jar`;
                 break;
+          case "quilt":
+                let quiltLoaderVersions = await (await fetch("https://meta.quiltmc.org/v3/versions/loader")).json();
+                let quiltInstallerVersions = await (await fetch("https://meta.quiltmc.org/v3/versions/installer")).json();
+                let dlresp = await fetch(quiltInstallerVersions[0].url);
+                let dlbuffer = await dlresp.arrayBuffer();
+                await fs.writeFile(`${path}/quilt-installer-${quiltInstallerVersions[0].version}.jar`, Buffer.from(dlbuffer));
+                let ifThisIsFalseQuiltFailedUs = await this.ultraSpecialAndIncrediblyStupidHandlerForQuilt(server.version, quiltInstallerVersions[0].version, quiltLoaderVersions[0].version, path);
+                if (!ifThisIsFalseQuiltFailedUs) {
+                    throw new Error("Quilt either did something incredibly stupid, or they don't support your server version. This generally shouldn't happen.")
+                }
+                softwareIsStupid = true;
+                break;
           default:
                 throw new Error("Invalid server software.");
         }
-        let jar = await fetch(downloadURL);
-        if (!jar.ok || !jar.body) throw new Error("Failed to download server jar.");
-        let jarBuffer = await jar.arrayBuffer();
-        await fs.writeFile(path + "/server.jar", Buffer.from(jarBuffer));
+        if (!softwareIsStupid) {
+            let jar = await fetch(downloadURL);
+            if (!jar.ok || !jar.body) throw new Error("Failed to download server jar.");
+            let jarBuffer = await jar.arrayBuffer();
+            await fs.writeFile(path + "/server.jar", Buffer.from(jarBuffer));
+        }
         // Create the eula.txt file
         await fs.writeFile(path + "/eula.txt", "eula=true\n");
         if(!await exists(path + "/server.properties")) await fs.writeFile(path + "/server.properties", `server-port=${server.port}
@@ -181,6 +247,7 @@ enforce-secure-profile=false
         return new Promise<void>(async resolve => {
             let startTimestamp = Date.now();
             let serverEntry = this.servers[server._id];
+            if (!serverEntry) return resolve();
             if (!serverEntry.childProcess) return resolve();
             serverEntry.stopping = true;
             this.updateStatus(server);
