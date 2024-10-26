@@ -69,7 +69,7 @@ async function changeMemory(newMem: string) {
     }
 }
 async function changeJVMArgs(newJVMArgs: string) {
-    if(newJVMArgs) {
+    if(typeof newJVMArgs == "string") {
         server.value = (await sendRequest("setServerOption", {id: props.server, jvmArgs: newJVMArgs})).server;
         servers.updateServer(server.value);
         events.emit("createNotification", `Server JVM arguments changed!`)

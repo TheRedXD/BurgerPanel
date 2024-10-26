@@ -13,6 +13,13 @@
     import event from '@util/event';
     import axios, { AxiosProgressEvent } from "axios";
     import TextInput from '@components/TextInput.vue';
+
+    let moddedServerSoftwares = ["fabric", "quilt", "forge"];
+
+    function isModded(software: string) {
+        return moddedServerSoftwares.includes(software);
+    }
+
     let finishedLoading = ref(false);
     let server = ref() as Ref<Server>;
     let props = defineProps({
@@ -476,7 +483,7 @@
                 server: props.server
             }
         }" v-if="path && path.toString().startsWith('/plugins') && hasServerPermission(user.user, server, 'plugins.download')">
-            <button class="back-server-page-btn">Download {{server.software == "fabric" ? "mods" : "plugins"}}</button>
+            <button class="back-server-page-btn">Download {{isModded(server.software) ? "mods" : "plugins"}}</button>
         </RouterLink><button class="back-server-page-btn" @click="newName = '';showNewDialog = true">New</button></h1>
         <Dropdown :create-on-cursor="true" ref="dropdown">
             <div id="dropdown-inner">

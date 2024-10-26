@@ -26,6 +26,6 @@ export type ServerStatuses = {
     }
 }
 // allowed mime types from file editor
-export const allowedMimeTypes = ["text/plain", "application/json", "text/yaml"];
+export const allowedMimeTypes = ["text/plain", "application/json", "application/json5", "text/yaml", "text/properties", "text/mcfunction", "text/mcmeta", "text/markdown"];
 // bypassed mime type blocks, direct paths
 export const allowedFileNames = ["/server.properties"];

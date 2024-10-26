@@ -35,7 +35,7 @@ export async function getPluginDetails(slug: string): Promise<Plugin> {
 }
 export async function getVersions(slug: string, version: string, software: AllowedSoftware): Promise<Version[]> {
   let encodedQS = qs.encode({
-    loaders: software == "fabric" ? ["fabric"] : JSON.stringify(bukkitTypes),
+    loaders: software == "fabric" ? ["fabric"] : (software == "quilt" ? ["quilt"] : JSON.stringify(bukkitTypes)),
     game_versions: JSON.stringify([version]),
   });
   return await sendModrinthRequest(

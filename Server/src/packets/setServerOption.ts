@@ -30,7 +30,7 @@ export default class SetServerOption extends Packet {
             logger.log(`${client.data.auth.user?.username} (${client.data.auth.user?._id}) is changing the memory of ${server.name} (${server._id}) to ${data.mem}`, "server.mem");
             server.mem = data.mem;
         }
-        if (data.jvmArgs && hasServerPermission(client.data.auth.user, server.toJSON(), "set.jvmArgs") && typeof data.jvmArgs == "string") {
+        if (hasServerPermission(client.data.auth.user, server.toJSON(), "set.jvmArgs") && typeof data.jvmArgs == "string") {
             logger.log(`${client.data.auth.user?.username} (${client.data.auth.user?._id}) is changing the jvmArgs of ${server.name} (${server._id}) to ${data.jvmArgs}`, "server.jvmArgs");
             server.jvmArgs = data.jvmArgs;
         }
@@ -83,7 +83,7 @@ export default class SetServerOption extends Packet {
                     server.allowedUsers = server.allowedUsers.map(au => {
                         if(au.user == user) {
                             if(newValue) au.permissions.push(permission);
-                            else au.permissions = au.permissions.filter(perm => perm != permission); 
+                            else au.permissions = au.permissions.filter(perm => perm != permission);
                         }
                         return au;
                     });

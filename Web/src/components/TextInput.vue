@@ -45,6 +45,9 @@
         text.value = props.default;
         disabled.value = true;
     }
+    watch(() => props.default, (newVal) => {
+        text.value = newVal;
+    });
     watch(disabled, (newVal) => {
         if(props.modalMode && newVal) disabled.value = false;
     })
